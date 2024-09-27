@@ -1,11 +1,12 @@
 /*
- * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
+ * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 15:05:31
- * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-09-27 15:05:35
+ * @LastEditors: hiddenSharp429 z404878860@163.com
+ * @LastEditTime: 2024-09-27 18:54:57
  * @FilePath: /YLC/src/api/apiUtils.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
+
 export const handleApiError = (error, defaultMessage) => {
     if (error.response) {
       // 服务器响应了，但状态码不在 2xx 范围内

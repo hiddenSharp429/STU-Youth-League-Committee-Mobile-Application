@@ -133,7 +133,7 @@ const ChoicePage = () => {
     try {
       const response = await loginUser(account, password);
       await handleLoginSuccess(response);
-      navigateToHome();
+      navigateToMyActivities();
     } catch (error) {
       handleLoginError(error);
     } finally {
@@ -150,9 +150,8 @@ const ChoicePage = () => {
     }
   };
 
-  const navigateToHome = () => {
-    // 使用你的导航库（如 React Navigation）导航到主页
-    // 例如：navigation.navigate('Home');
+  const navigateToMyActivities = () => {
+    navigation.navigate('MyActivities');
   };
 
   const handleLoginError = (error) => {
