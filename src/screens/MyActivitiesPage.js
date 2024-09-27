@@ -3,30 +3,31 @@ import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, Alert } from
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import BottomTabNavigator from '../components/BottomTabNavigator';
+import { getMyActivities, getMyActivitiesCount } from '../api/activityApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ActivityItem = ({ item, onPress, onSummarize }) => (
-  <TouchableOpacity style={styles.activityItem} onPress={() => onPress(item._id)}>
+const ActivityItem = ({ item, onPress }) => (
+  <TouchableOpacity style={styles.activityItem} onPress={() => onPress(item)}>
     <View>
-      <Text>活动名称：{item.a1_huodongName}</Text>
-      <Text style={styles.eventTime}>活动开始时间：{item.a2_startTime}</Text>
+      <Text style={styles.activityName}>活动名称：{item.activity_name}</Text>
+      <Text style={styles.eventTime}>开始时间：{new Date(item.start_date).toLocaleDateString()}</Text>
+      <Text style={styles.eventTime}>结束时间：{new Date(item.end_date).toLocaleDateString()}</Text>
+      <Text style={styles.eventDetail}>组织：{item.organization}</Text>
+      <Text style={styles.eventDetail}>负责人：{item.responsible_name}</Text>
     </View>
-    {item.state === 0 && (
+    {item.status === 0 && (
       <View style={styles.state_0}>
         <Text style={styles.stateContent}>审核中</Text>
       </View>
     )}
-    {item.state === 1 && (
+    {item.status === 1 && (
       <View style={styles.state_1}>
         <Text style={styles.stateContent}>已通过</Text>
-        <TouchableOpacity style={styles.summarizeButton} onPress={() => onSummarize(item._id)}>
-          <Text style={styles.summarizeButtonText}>活动总结</Text>
-        </TouchableOpacity>
       </View>
     )}
-    {item.state === 2 && (
+    {item.status === 2 && (
       <View style={styles.state_2}>
         <Text style={styles.stateContent}>已驳回</Text>
-        <Text style={styles.rejectReason}>驳回理由：{item.rejectReason}</Text>
       </View>
     )}
     <Image 
@@ -43,38 +44,79 @@ const MyActivitiesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(0);
   const [totalRecord, setTotalRecord] = useState(0);
+  const [userId, setUserId] = useState(null);
+  const [needRefresh, setNeedRefresh] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetchActivities();
-    fetchTotalCount();
-  }, [currentPage]);
+    const getUserId = async () => {
+      const storedUserId = await AsyncStorage.getItem('userId');
+      if (storedUserId) {
+        setUserId(storedUserId);
+      } else {
+        Alert.alert('错误', '用户未登录');
+        navigation.navigate('Login');
+      }
+    };
+    getUserId();
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetchActivities();
+      fetchTotalCount();
+    }
+  }, [userId, currentPage]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      const params = navigation.getState().routes.find(r => r.name === 'MyActivities')?.params;
+      if (params?.needRefresh) {
+        setNeedRefresh(true);
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  useEffect(() => {
+    if (needRefresh && userId) {
+      fetchActivities();
+      fetchTotalCount();
+      setNeedRefresh(false);
+    }
+  }, [needRefresh, userId]);
 
   const fetchActivities = async () => {
     try {
-      const data = await getMyActivities(currentPage);
-      setActivities(data);
+      const data = await getMyActivities(userId, [0, 1, 2], currentPage, 4);
+      setActivities(data.activities || []);
+      if (data.activities.length === 0 && currentPage > 1) {
+        setCurrentPage(prev => Math.max(prev - 1, 1));
+      }
     } catch (error) {
+      console.error('获取活动列表失败', error);
       Alert.alert('错误', '获取活动列表失败');
     }
   };
 
   const fetchTotalCount = async () => {
     try {
-      const { total } = await getUserInfo();
+      const { total } = await getMyActivitiesCount(userId, [0, 1, 2]);
       setTotalRecord(total);
-      setTotalPage(Math.ceil(total / 4));
+      setTotalPage(Math.ceil(total / 4)); // 假设每页显示4条记录
     } catch (error) {
       console.error('获取总数失败', error);
     }
   };
 
-  const handleActivityPress = (id) => {
-    navigation.navigate('EventDetail', { id, user: 'stu', type: '1' });
-  };
-
-  const handleSummarize = (id) => {
-    navigation.navigate('Summarize', { id });
+  const handleActivityPress = (activity) => {
+    navigation.navigate('EventDetail', { 
+      activityId: activity.id,
+      activity: activity,
+      user: 'stu',
+      type: 'activity'
+    });
   };
 
   const nextPage = () => {
@@ -112,10 +154,9 @@ const MyActivitiesPage = () => {
               <ActivityItem 
                 item={item} 
                 onPress={handleActivityPress}
-                onSummarize={handleSummarize}
               />
             )}
-            keyExtractor={item => item._id}
+            keyExtractor={item => item.id.toString()}
           />
         )}
         {activities.length > 0 && (
@@ -176,43 +217,66 @@ const styles = StyleSheet.create({
   },
   activityItem: {
     backgroundColor: 'white',
+    marginHorizontal: 20,
     padding: 15,
     marginBottom: 10,
-    borderRadius: 5,
+    borderRadius: 15,
     position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  activityName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   eventTime: {
     color: '#666',
     fontSize: 14,
-    marginTop: 5,
+    marginBottom: 3,
+  },
+  eventDetail: {
+    fontSize: 14,
+    marginBottom: 2,
   },
   state_0: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 0,
+    right: 0,
     backgroundColor: '#FFA500',
-    padding: 5,
-    borderRadius: 5,
+    padding: 10,
+    borderTopLeftRadius: 0,   
+    borderTopRightRadius: 15,   
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 0 
   },
   state_1: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 0,
+    right: 0,
     backgroundColor: '#4CAF50',
-    padding: 5,
-    borderRadius: 5,
+    padding: 10,
+    borderTopLeftRadius: 0,   
+    borderTopRightRadius: 15,   
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 0 
   },
   state_2: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 0,
+    right: 0,
     backgroundColor: '#F44336',
-    padding: 5,
-    borderRadius: 5,
+    padding: 10,
+    borderTopLeftRadius: 0,   
+    borderTopRightRadius: 15,   
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 0 
   },
   stateContent: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 15,
+    fontWeight: 'bold',
   },
   summarizeButton: {
     position: 'absolute',
@@ -237,9 +301,6 @@ const styles = StyleSheet.create({
   statusDot: {
     width: 11,
     height: 11,
-    position: 'absolute',
-    left: 15,
-    bottom: 15,
   },
   pagination: {
     flexDirection: 'row',

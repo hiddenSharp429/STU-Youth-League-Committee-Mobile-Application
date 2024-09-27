@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 20:35:32
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-27 21:01:37
+ * @LastEditTime: 2024-09-28 02:37:54
  * @FilePath: /YLC/backend/src/models/activityModel.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -16,7 +16,7 @@ class ActivityModel {
       budgetTotal, budgetSelf, budgetApply, hasSponsor, sponsorCompany,
       sponsorForm, sponsorMoney, needBorrow, borrowerName, borrowerGrade,
       borrowerAge, borrowerPhone, borrowerMoney, needServiceFee, serviceObject,
-      serviceMoney, participantCount, needUploadOA, remark, briefContent
+      serviceMoney, participantCount, needUploadOA, remark, briefContent, userId, status
     } = activityData;
 
     // 转换日期格式
@@ -54,7 +54,9 @@ class ActivityModel {
       participant_count: participantCount || null,
       need_upload_oa: needUploadOA,
       remark: remark || null,
-      brief_content: briefContent || null
+      brief_content: briefContent || null,
+      userId: userId,
+      status: status
     };
 
     const fields = Object.keys(processedData).filter(key => processedData[key] !== null);
@@ -66,6 +68,98 @@ class ActivityModel {
     const [result] = await db.execute(query, values);
 
     return result.insertId;
+  }
+
+  static async getUserActivities(userId, status, offset, limit) {
+    // 确保 offset 和 limit 是数字
+    offset = parseInt(offset, 10);
+    limit = parseInt(limit, 10);
+    
+    // status为数组，获取status最大值
+    const maxStatus = Math.max(...status);
+
+    // 添加一些错误检查
+    if (isNaN(offset) || isNaN(limit) || offset < 0 || limit < 0) {
+      throw new Error('Invalid offset or limit');
+    }
+
+    // 首先获取总记录数
+    const [countResult] = await db.execute(
+      'SELECT COUNT(*) as total FROM activities WHERE userId = ?',
+      [userId]
+    );
+    const total = countResult[0].total;
+    
+    // 如果没有记录，直接返回空数组
+    if (total === 0) {
+      return [];
+    }
+
+    // 调整 offset，确保它不会超过总记录数
+    offset = Math.min(offset, total);
+    // 调整 limit，确保它不会超过总记录数
+    limit = Math.min(limit, total - offset);
+
+    
+    // 使用模板字符串构建 SQL 查询
+    const query = `SELECT * FROM activities WHERE userId = ? AND status <= ? ORDER BY start_date DESC LIMIT ${limit} OFFSET ${offset}`;
+    
+    const [rows] = await db.execute(query, [userId, maxStatus]);
+    return rows;
+  }
+  
+  static async getUserActivitiesCount(userId, status) {
+    // status为数组，获取status最大值
+    const maxStatus = Math.max(...status);
+    const [rows] = await db.execute(
+      'SELECT COUNT(*) as total FROM activities WHERE userId = ? AND status <= ?',
+      [userId, maxStatus]
+    );
+    return rows[0].total;
+  }
+
+  static async updateActivity(id, activityData) {
+    // 创建一个新对象，只包含我们想要更新的字段
+    const updateData = { ...activityData };
+    delete updateData.id;
+    delete updateData.created_at;
+    delete updateData.updated_at;
+  
+    // 处理日期格式
+    if (updateData.start_date) {
+      updateData.start_date = new Date(updateData.start_date).toISOString().slice(0, 10);
+    }
+    if (updateData.end_date) {
+      updateData.end_date = new Date(updateData.end_date).toISOString().slice(0, 10);
+    }
+  
+    const fields = Object.keys(updateData);
+    const values = fields.map(field => updateData[field]);
+    const placeholders = fields.map(field => `${field} = ?`).join(', ');
+  
+    const query = `UPDATE activities SET ${placeholders}, status = 0 WHERE id = ?`;
+    values.push(id);
+  
+    try {
+      const [result] = await db.execute(query, values);
+  
+      if (result.affectedRows === 0) {
+        throw new Error('Activity not found or no changes made');
+      }
+  
+      return { ...updateData, id };
+    } catch (error) {
+      console.error('SQL Error:', error);
+      throw error;
+    }
+  }
+
+  static async getActivityById(id) {
+    const [rows] = await db.execute('SELECT * FROM activities WHERE id = ?', [id]);
+    if (rows.length === 0) {
+      throw new Error('Activity not found');
+    }
+    return rows[0];
   }
 }
 

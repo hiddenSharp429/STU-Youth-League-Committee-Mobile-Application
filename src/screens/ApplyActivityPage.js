@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 19:29:54
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-27 21:04:13
+ * @LastEditTime: 2024-09-28 01:22:45
  * @FilePath: /YLC/src/screens/ApplyActivityPage.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -15,10 +15,12 @@ import { useNavigation } from '@react-navigation/native';
 import RadioButton from '../components/RadioButton';
 import BottomTabNavigator from '../components/BottomTabNavigator';
 import { addActivity } from '../api/activityApi';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const ApplyActivityPage = () => {
   const navigation = useNavigation();
   const [formData, setFormData] = useState({
+    userId:'',
+    status: 0,
     activityName: '',
     startDate: new Date(),
     endDate: new Date(),
@@ -55,8 +57,8 @@ const ApplyActivityPage = () => {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
-  const organizations = ['校团委', '学生会', '校青协', '汕大青年', '踹网', '社团中心', '研会'];
-  const campuses = ['桑浦山校区', '东海岸校区'];
+  const organizations = ['', '校团委', '学生会', '校青协', '汕大青年', '踹网', '社团中心', '研会'];
+  const campuses = ['', '桑浦山校区', '东海岸校区'];
 
   const sponsorOptions = [
     { label: '是', value: 'yes' },
@@ -78,8 +80,32 @@ const ApplyActivityPage = () => {
     { label: '否', value: 'no' },
   ];
 
+  useEffect(() => {
+    // 在组件加载时获取用户 ID
+    const getUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem('userId');
+        if (storedUserId) {
+          setFormData(prevData => ({ ...prevData, userId: storedUserId }));
+        } else {
+          // 如果没有找到用户 ID，可能需要重定向到登录页面
+          Alert.alert('错误', '用户未登录');
+          navigation.navigate('ChoicePage');
+        }
+      } catch (error) {
+        console.error('获取用户 ID 失败:', error);
+      }
+    };
+
+    getUserId();
+  }, []);
+
   const handleSubmit = async () => {
     // 表单验证
+    if (!formData.userId) {
+        Alert.alert('错误', '用户未登录');
+        return;
+    }
     if (!formData.activityName) {
       Alert.alert('错误', '请填写活动名称');
       return;
@@ -189,6 +215,7 @@ const ApplyActivityPage = () => {
       sponsorMoney: formData.hasSponsor === 'yes' ? formData.sponsorMoney : null,
       borrowerMoney: formData.needBorrow === 'yes' ? formData.borrowerMoney : null,
       serviceMoney: formData.needServiceFee === 'yes' ? formData.serviceMoney : null,
+      
     };
 
     // 移除所有空字符串的字段
@@ -213,9 +240,6 @@ const ApplyActivityPage = () => {
         <View style={styles.apply}>
             <View style={styles.applyTitle}>
             <Text style={styles.titleText}>申请活动</Text>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-                <Icon name="arrow-left" size={24} color="#000" />
-            </TouchableOpacity>
             </View>
             
             {/* 活动内容 */}
