@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-09-26 20:14:02
  * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-09-26 20:26:08
+ * @LastEditTime: 2024-09-26 22:52:03
  * @FilePath: /YLC/src/api/authApi.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -26,6 +26,36 @@ export const loginUser = async (account, password) => {
       throw new Error('无法连接到服务器');
     } else {
       // 在设置请求时发生了一些错误
+      throw new Error('发生错误，请稍后再试');
+    }
+  }
+};
+
+export const checkInviteCode = async (inviteCode, type) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/check-invite`, { inviteCode, type });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw new Error(error.response.data.message || '邀请码验证失败');
+    } else if (error.request) {
+      throw new Error('无法连接到服务器');
+    } else {
+      throw new Error('发生错误，请稍后再试');
+    }
+  }
+};
+
+export const registerUser = async (account, password, name, type, inviteCode) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/register`, { account, password, name, type, inviteCode });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw new Error(error.response.data.message || '注册失败');
+    } else if (error.request) {
+      throw new Error('无法连接到服务器');
+    } else {
       throw new Error('发生错误，请稍后再试');
     }
   }

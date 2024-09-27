@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { Overlay, Divider, Icon } from 'react-native-elements';
+import { Overlay, Divider } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { loginUser } from '../api/authApi';
 import LoginOverlay from '../components/LoginOverlay';
+import PatternLock from '../components/PatternLock';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const ChoicePage = () => {
   const [show, setShow] = useState(false);
   const [password, setPassword] = useState('');
   const [account, setAccount] = useState('');
-  const [openid, setOpenid] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showApprovalOverlay, setShowApprovalOverlay] = useState(false);
+  const [approvalType, setApprovalType] = useState('');
+  const [showPatternLock, setShowPatternLock] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -20,7 +24,37 @@ const ChoicePage = () => {
 
   const goNext = () => {
     console.log('点击了审批端登录');
-    navigation.navigate('NextChoice');
+    Alert.alert(
+      '选择审批端类型',
+      '请选择要登录的审批端类型',
+      [
+        {
+          text: '审批活动端',
+          onPress: () => {
+            setApprovalType('activity');
+            setShowApprovalOverlay(true);
+          }
+        },
+        {
+          text: '审批预约端',
+          onPress: () => {
+            setApprovalType('appointment');
+            setShowApprovalOverlay(true);
+          }
+        },
+        {
+          text: '取消',
+          style: 'cancel'
+        }
+      ]
+    );
+  };
+
+  const handleApprovalLogin = async () => {
+    // 这里实现审批端登录逻辑
+    console.log(`Logging in to ${approvalType} approval system`);
+    // 可以根据 approvalType 调用不同的登录 API
+    // 登录成功后，可以导航到相应的页面
   };
 
   const goIndex = async () => {
@@ -32,6 +66,26 @@ const ChoicePage = () => {
 
   const onClickHide = () => {
     setShow(false);
+    setShowApprovalOverlay(false);
+  };
+
+  const handleRegister = (loginType) => {
+    onClickHide();
+    let type;
+    switch(loginType) {
+      case 'user':
+        type = 0;
+        break;
+      case 'activity':
+        type = 1;
+        break;
+      case 'appointment':
+        type = 2;
+        break;
+      default:
+        type = 0;
+    }
+    navigation.navigate('Register', { type });
   };
 
   const lookGuide = () => {
@@ -117,7 +171,22 @@ const ChoicePage = () => {
   };
 
   const enterUserManagementPage = () => {
-    // 实现管理员验证和页面跳转逻辑
+    Alert.alert(
+      '管理员验证',
+      '请输入管理员图案密码',
+      [
+        {
+          text: '取消',
+          style: 'cancel'
+        },
+        {
+          text: '确定',
+          onPress: () => {
+            setShowPatternLock(true);
+          }
+        }
+      ]
+    );
   };
 
   const copyGitHubLink = () => {
@@ -148,12 +217,12 @@ const ChoicePage = () => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={[styles.button, {backgroundColor: '#D43030'}]} onPress={goIndex}>
           <Text style={[styles.buttonText, {color: 'white'}]}>用户端登录</Text>
-          <Icon name="people" type="ionicon" size={24} color="white" />
+          <FontAwesome name="users" size={24} color="white" />
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.button, {backgroundColor: '#FFFFFF'}]} onPress={goNext}>
           <Text style={[styles.buttonText, {color: 'black'}]}>审批端登录</Text>
-          <Icon name="person" type="ionicon" size={24} color="black" />
+          <FontAwesome name="user" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
@@ -161,19 +230,19 @@ const ChoicePage = () => {
       <Text style={styles.versionTip}>v1.0</Text>
 
       <TouchableOpacity style={styles.githubButton} onPress={copyGitHubLink}>
-        <Image source={require('../../assets/icons/GitHub.png')} style={styles.githubImage} />
+        <FontAwesome name="github" size={50} color="black" />
       </TouchableOpacity>
 
 
       <TouchableOpacity style={styles.guideButton} onPress={lookGuide}>
         <Text style={styles.guideText}>手册及日志</Text>
-        <Image source={require('../../assets/icons/guide.png')} style={styles.guideImage} />
+        <FontAwesome name="book" size={70} color="brown" />
       </TouchableOpacity>
 
 
       <TouchableOpacity style={styles.addUserButton} onPress={enterUserManagementPage}>
         <Text style={styles.addUserText}>添加用户</Text>
-        <Image source={require('../../assets/icons/addUser.png')} style={styles.addUserImage} />
+        <FontAwesome name="user-plus" size={60} color="brown" />
       </TouchableOpacity>
 
       <View style={styles.footerDividerContainer}>
@@ -190,10 +259,45 @@ const ChoicePage = () => {
           setPassword={setPassword}
           onClose={onClickHide}
           onLogin={enterIndex}
-          onRegister={goRegister}
+          onRegister={() => handleRegister('user')}
           onRetrieve={goRetrieve}
+          loginType="user"
         />
       </Overlay>
+
+      <Overlay isVisible={showApprovalOverlay} onBackdropPress={onClickHide} overlayStyle={styles.overlay}>
+        <LoginOverlay 
+          account={account}
+          setAccount={setAccount}
+          password={password}
+          setPassword={setPassword}
+          onClose={onClickHide}
+          onLogin={handleApprovalLogin}
+          onRegister={() => handleRegister(approvalType)}
+          onRetrieve={goRetrieve}
+          loginType={approvalType}
+        />
+      </Overlay>
+
+      <Overlay 
+        isVisible={showPatternLock} 
+        onBackdropPress={() => setShowPatternLock(false)}
+        overlayStyle={styles.patternLockOverlay}
+      >
+        <View style={styles.patternLockContainer}>
+          <PatternLock
+            onSuccess={() => {
+              setShowPatternLock(false);
+              navigation.navigate('UserManagement');
+            }}
+            onFailure={() => {
+              Alert.alert('错误', '图案密码不正确');
+              setShowPatternLock(false);
+            }}
+          />
+        </View>
+      </Overlay>
+
       {isLoading && <ActivityIndicator size="large" color="#0000ff" />}
     </View>
   );
@@ -251,10 +355,6 @@ const styles = StyleSheet.create({
     top: 10,
     left: 10,
   },
-  githubImage: {
-    width: 50,
-    height: 50,
-  },
   guideButton: {
     position: 'absolute',
     right: 20,
@@ -266,10 +366,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'brown',
   },
-  guideImage: {
-    width: 70,
-    height: 70,
-  },
   addUserButton: {
     position: 'absolute',
     bottom: 35,
@@ -279,10 +375,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: 'brown',
-  },
-  addUserImage: {
-    width: 60,
-    height: 60,
   },
   footerDividerContainer: {
     flexDirection: 'row',
@@ -304,6 +396,17 @@ const styles = StyleSheet.create({
     height: 'auto',
     borderRadius: 20,
     padding: 0,
+  },
+  patternLockOverlay: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  patternLockContainer: {
+    width: '100%',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
