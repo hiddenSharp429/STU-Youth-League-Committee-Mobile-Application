@@ -1,9 +1,9 @@
 /*
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @Date: 2024-09-26 20:14:02
+ * @Date: 2024-09-27 15:04:21
  * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-09-27 15:04:41
- * @FilePath: /YLC/src/api/authApi.js
+ * @LastEditTime: 2024-09-27 15:19:11
+ * @FilePath: /YLC/src/api/userApi.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import axios from 'axios';
@@ -11,22 +11,22 @@ import { handleApiError } from './apiUtils';
 
 const API_URL = 'http://localhost:3000/api';
 
-export const loginUser = async (account, password) => {
+export const getUsers = async () => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, { account, password });
+    const response = await axios.get(`${API_URL}/auth/users`);
     return response.data;
   } catch (error) {
-    throw handleApiError(error, '登录失败');
+    throw handleApiError(error, '获取用户列表失败');
   }
 };
 
-export const registerUser = async (account, password, name, type, inviteCode) => {
+export const deleteUser = async (id) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/register`, { account, password, name, type, inviteCode });
+    const response = await axios.delete(`${API_URL}/auth/users/${id}`);
     return response.data;
   } catch (error) {
-    throw handleApiError(error, '注册失败');
+    throw handleApiError(error, '删除用户失败');
   }
 };
 
-// 其他认证相关的 API，如重置密码等
+// 其他用户相关的 API

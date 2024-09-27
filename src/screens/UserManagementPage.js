@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-09-27 07:50:38
  * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-09-27 12:42:49
+ * @LastEditTime: 2024-09-27 14:48:04
  * @FilePath: /YLC/src/screens/UserManagementPage.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -28,22 +28,22 @@ const UserManagement = () => {
           <GridItem
             icon="user-plus"
             text="添加用户端成员"
-            onPress={() => navigation.navigate('AddUserPage')}
+            onPress={() => navigation.navigate('AddUser')}
           />
           <GridItem
             icon="undo"
             text="撤销成员现有资格"
-            onPress={() => navigation.navigate('Eligibility', { type: 0 })}
+            onPress={() => navigation.navigate('RevokeExistingMember')}
           />
           <GridItem
             icon="user-secret"
             text="添加审批端成员"
-            onPress={() => navigation.navigate('AddAdminPage')}
+            onPress={() => navigation.navigate('AddAdmin')}
           />
           <GridItem
             icon="ellipsis-h"
             text="撤销成员注册资格"
-            onPress={() => navigation.navigate('Eligibility', { type: 1 })}
+            onPress={() => navigation.navigate('RevokeRegistration')}
           />
         </View>
       </View>

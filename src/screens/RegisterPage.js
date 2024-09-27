@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Input, Button } from 'react-native-elements';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { checkInviteCode, registerUser } from '../api/authApi';
+import { registerUser } from '../api/authApi';
+import { checkInviteCode } from '../api/inviteCodeApi';
 
 const RegisterScreen = () => {
   const [account, setAccount] = useState('');

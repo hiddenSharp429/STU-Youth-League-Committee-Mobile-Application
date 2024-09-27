@@ -60,8 +60,6 @@ const ChoicePage = () => {
   const goIndex = async () => {
     setShow(true);
     console.log('点击了用户登录');
-    // 这里应该检查数据库中是否有对应的openid
-    // 如果有，则自动登录
   };
 
   const onClickHide = () => {
@@ -162,12 +160,10 @@ const ChoicePage = () => {
     Alert.alert('登录失败', error.message);
   };
 
-  const goRegister = () => {
-    navigation.navigate('Register', { type: 0 });
-  };
 
   const goRetrieve = () => {
-    navigation.navigate('Retrieve');
+    // 暂时不开放找回密码功能
+    Alert.alert('告知', '找回密码功能暂未开放');
   };
 
   const enterUserManagementPage = () => {

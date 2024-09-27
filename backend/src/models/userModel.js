@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-09-26 19:54:41
  * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-09-26 22:31:40
+ * @LastEditTime: 2024-09-27 14:50:23
  * @FilePath: /YLC/backend/src/models/user.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -20,6 +20,20 @@ class UserModel {
       [account, password, name, type]
     );
     return { id: result.insertId, account, name, type };
+  }
+
+  static async getAllUsers() {
+    const [rows] = await db.execute('SELECT id, account, name, type FROM users');
+    return rows;
+  }
+
+  static async findById(id) {
+    const [rows] = await db.execute('SELECT * FROM users WHERE id = ?', [id]);
+    return rows[0];
+  }
+
+  static async deleteUser(id) {
+    await db.execute('DELETE FROM users WHERE id = ?', [id]);
   }
 }
 

@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-09-26 20:05:14
  * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-09-26 22:50:35
+ * @LastEditTime: 2024-09-27 14:50:13
  * @FilePath: /YLC/backend/src/services/authService.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -43,6 +43,41 @@ class AuthService {
     await InviteCodeModel.markInviteCodeAsUsed(inviteCode);
 
     return { success: true, userId: newUser.id, message: '注册成功' };
+  }
+
+  static async createInviteCode(code, name, type) {
+    // 首先检查邀请码是否已存在
+    const existingCode = await InviteCodeModel.findByCode(code);
+    if (existingCode) {
+      throw new Error('邀请码已存在');
+    }
+
+    await InviteCodeModel.createInviteCode(code, name, type);
+    return { success: true, inviteCode: code, message: '邀请码创建成功' };
+  }
+
+  static async getUsers() {
+    return await UserModel.getAllUsers();
+  }
+
+  static async deleteUser(id) {
+    const user = await UserModel.findById(id);
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+    await UserModel.deleteUser(id);
+  }
+
+  static async getInviteCodes() {
+    return await InviteCodeModel.getAllInviteCodes();
+  }
+
+  static async deleteInviteCode(id) {
+    const inviteCode = await InviteCodeModel.findById(id);
+    if (!inviteCode) {
+      throw new Error('邀请码不存在');
+    }
+    await InviteCodeModel.deleteInviteCode(id);
   }
 }
 
