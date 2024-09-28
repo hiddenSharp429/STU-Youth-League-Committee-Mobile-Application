@@ -13,6 +13,10 @@ const EventDetailPage = () => {
     navigation.navigate('EditActivity', { activity });
   };
 
+  const handleSubmitSummary = () => {
+    navigation.navigate('SubmitActivitySummary', { activity });
+  };
+
   const renderEditButton = () => {
     if (user === 'stu' && activity.status === 2) {
       return (
@@ -23,6 +27,18 @@ const EventDetailPage = () => {
     }
     return null;
   };
+
+  const renderSubmitSummaryButton = () => {
+    if (user === 'stu' && activity.status === 1) {
+      return (
+        <TouchableOpacity style={styles.editButton} onPress={handleSubmitSummary}>
+          <Text style={styles.editButtonText}>提交总结</Text>
+        </TouchableOpacity>
+      );
+    }
+    return null;
+  };
+
 
   const renderSection = (title, content) => (
     <View style={styles.section}>
@@ -43,6 +59,7 @@ const EventDetailPage = () => {
           }
         </Text>
         {renderEditButton()}
+        {renderSubmitSummaryButton()}
       </View>
 
       <View style={styles.infoContainer}>

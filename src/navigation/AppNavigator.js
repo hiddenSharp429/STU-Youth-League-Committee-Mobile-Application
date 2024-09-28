@@ -20,6 +20,7 @@ import MyActivitiesPage from '../screens/MyActivitiesPage';
 import ApplyActivityPage from '../screens/ApplyActivityPage';
 import EventDetailPage from '../screens/EventDetailPage';
 import EditActivityPage from '../screens/EditActivityPage';
+import SubmitActivitySummaryPage from '../screens/SubmitActivitySummaryPage';
 // 导入其他页面...
 
 const Stack = createStackNavigator();
@@ -43,6 +44,7 @@ function AppNavigator() {
         <Stack.Screen name="ApplyActivity" component={ApplyActivityPage} />
         <Stack.Screen name="EventDetail" component={EventDetailPage} />
         <Stack.Screen name="EditActivity" component={EditActivityPage}/>
+        <Stack.Screen name="SubmitActivitySummary" component={SubmitActivitySummaryPage}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
