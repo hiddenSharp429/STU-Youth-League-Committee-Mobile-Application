@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 19:29:54
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-28 01:22:45
+ * @LastEditTime: 2024-09-29 15:09:48
  * @FilePath: /YLC/src/screens/ApplyActivityPage.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -228,6 +228,9 @@ const ApplyActivityPage = () => {
     try {
       const result = await addActivity(formattedData);
       Alert.alert('成功', result.message);
+      navigation.navigate('MyActivities', { 
+        needRefresh: true
+      });
     } catch (error) {
       Alert.alert('错误', error.message);
     }

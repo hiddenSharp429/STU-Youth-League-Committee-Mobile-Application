@@ -75,7 +75,7 @@ const SubmitActivitySummaryPage = () => {
     const formData = new FormData();
     formData.append('file', {
       uri: file.uri,
-      type: file.type,
+      type: file.type || 'application/octet-stream', // 如果类型未知，使用通用二进制流类型
       name: file.name,
     });
 
@@ -85,6 +85,7 @@ const SubmitActivitySummaryPage = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
+      console.log('File upload response:', response.data); // 添加日志
       return response.data.fileUrl;
     } catch (error) {
       console.error('文件上传失败', error);

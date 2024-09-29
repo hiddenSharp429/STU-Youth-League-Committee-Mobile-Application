@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 20:35:32
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-29 13:15:08
+ * @LastEditTime: 2024-09-29 15:03:44
  * @FilePath: /YLC/backend/src/models/activityModel.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -77,6 +77,7 @@ class ActivityModel {
     
     // status为数组，获取status最大值
     const maxStatus = Math.max(...status);
+    const minStatus = Math.min(...status);
 
     // 添加一些错误检查
     if (isNaN(offset) || isNaN(limit) || offset < 0 || limit < 0) {
@@ -102,18 +103,19 @@ class ActivityModel {
 
     
     // 使用模板字符串构建 SQL 查询
-    const query = `SELECT * FROM activities WHERE userId = ? AND status <= ? ORDER BY start_date DESC LIMIT ${limit} OFFSET ${offset}`;
+    const query = `SELECT * FROM activities WHERE userId = ? AND status >= ? AND status <= ? ORDER BY start_date DESC LIMIT ${limit} OFFSET ${offset}`;
     
-    const [rows] = await db.execute(query, [userId, maxStatus]);
+    const [rows] = await db.execute(query, [userId, minStatus, maxStatus]);
     return rows;
   }
   
   static async getUserActivitiesCount(userId, status) {
     // status为数组，获取status最大值
     const maxStatus = Math.max(...status);
+    const minStatus = Math.min(...status);
     const [rows] = await db.execute(
-      'SELECT COUNT(*) as total FROM activities WHERE userId = ? AND status <= ?',
-      [userId, maxStatus]
+      'SELECT COUNT(*) as total FROM activities WHERE userId = ? AND status >= ? AND status <= ?',
+      [userId, minStatus, maxStatus]
     );
     return rows[0].total;
   }

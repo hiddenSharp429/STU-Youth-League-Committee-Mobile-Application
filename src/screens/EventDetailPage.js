@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getActivityById } from '../api/activityApi';
 
@@ -39,6 +40,40 @@ const EventDetailPage = () => {
     return null;
   };
 
+  const renderStepBar = () => {
+    // 如果活动状态为已驳回（status为2），则不显示进度条
+    if (activity.status === 2) {
+      return null;
+    }
+
+    const steps = [
+      { label: '审核中', status: 0 },
+      { label: '已通过', status: 1 },
+      { label: '已提交总结', status: 3 },
+      { label: '已结束', status: 4 }
+    ];
+
+    return (
+      <View style={styles.stepBar}>
+        {steps.map((step, index) => (
+          <React.Fragment key={index}>
+            <View style={[
+              styles.step,
+              activity.status >= step.status ? styles.stepCompleted : styles.stepIncomplete
+            ]}>
+              <Text style={styles.stepText}>{step.label}</Text>
+            </View>
+            {index < steps.length - 1 && (
+              <View style={[
+                styles.stepConnector,
+                activity.status > step.status ? styles.stepConnectorCompleted : styles.stepConnectorIncomplete
+              ]} />
+            )}
+          </React.Fragment>
+        ))}
+      </View>
+    );
+  };
 
   const renderSection = (title, content) => (
     <View style={styles.section}>
@@ -46,6 +81,58 @@ const EventDetailPage = () => {
       <Text style={styles.sectionContent}>{content}</Text>
     </View>
   );
+
+  const renderFileLink = (url, title) => {
+    if (url) {
+      const fileName = url.split('/').pop(); // 从 URL 中提取文件名
+      return (
+        <TouchableOpacity 
+          style={styles.fileLink} 
+          onPress={() => {
+            console.log('Opening file:', url); // 添加日志
+            Linking.openURL(url).catch(err => {
+              console.error('无法打开文件', err);
+              Alert.alert('错误', '无法打开文件');
+            });
+          }}
+        >
+          <Icon name="file" size={20} color="#4CAF50" />
+          <Text style={styles.fileLinkText}>{title}: {fileName}</Text>
+        </TouchableOpacity>
+      );
+    }
+    return null;
+  };
+
+  const renderSummarySection = () => {
+    if (activity.status < 3) {
+      return null;
+    }
+
+    return (
+      <View style={styles.infoContainer}>
+        <Text style={styles.sectionHeader}>活动总结</Text>
+        {renderSection('实际参与人数', activity.practical_member)}
+        {renderSection('实际总费用', `${activity.practical_total_money} 元`)}
+        {renderSection('实际赞助金额', `${activity.practical_sponsorship} 元`)}
+        {renderSection('实际申请拨款金额', `${activity.practical_ap_money} 元`)}
+        
+        {renderFileLink(activity.satisfaction_survey_url, '满意度调查表')}
+        {renderFileLink(activity.fund_details_url, '资金细项')}
+        {renderFileLink(activity.activity_files_url, '活动文件')}
+
+        <Text style={styles.sectionTitle}>宣传报道链接:</Text>
+        {(activity.publicity_links || []).map((link, index) => (
+          <Text key={index} style={styles.link} onPress={() => Linking.openURL(link)}>{link}</Text>
+        ))}
+
+        <Text style={styles.sectionTitle}>办公自动化链接:</Text>
+        {(activity.oa_links || []).map((link, index) => (
+          <Text key={index} style={styles.link} onPress={() => Linking.openURL(link)}>{link}</Text>
+        ))}
+      </View>
+    );
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -55,9 +142,12 @@ const EventDetailPage = () => {
           状态: {
             activity.status === 0 ? '审核中' :
             activity.status === 1 ? '已通过' :
-            '已驳回'
+            activity.status === 2 ? '已驳回' :
+            activity.status === 3 ? '已提交总结' :
+            activity.status === 4 ? '已结束' : '未知状态'
           }
         </Text>
+        {renderStepBar()}
         {renderEditButton()}
         {renderSubmitSummaryButton()}
       </View>
@@ -125,6 +215,14 @@ const EventDetailPage = () => {
         <Text style={styles.sectionHeader}>活动简介</Text>
         <Text style={styles.briefContent}>{activity.brief_content}</Text>
       </View>
+
+      <View style={styles.infoContainer}>
+        <Text style={styles.sectionHeader}>活动总结</Text>
+        <Text style={styles.briefContent}>{activity.summary_content}</Text>
+      </View>
+
+      {renderSummarySection()}
+
     </ScrollView>
   );
 };
@@ -187,6 +285,57 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     fontWeight: 'bold',
+  },
+  stepBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  step: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stepCompleted: {
+    backgroundColor: '#4CAF50',
+  },
+  stepIncomplete: {
+    backgroundColor: '#E0E0E0',
+  },
+  stepText: {
+    color: '#FFF',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  stepConnector: {
+    height: 2,
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  stepConnectorCompleted: {
+    backgroundColor: '#4CAF50',
+  },
+  stepConnectorIncomplete: {
+    backgroundColor: '#E0E0E0',
+  },
+  fileLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 5,
+  },
+  fileLinkText: {
+    marginLeft: 10,
+    color: '#4CAF50',
+    textDecorationLine: 'underline',
+  },
+  link: {
+    color: '#2196F3',
+    textDecorationLine: 'underline',
+    marginVertical: 2,
   },
 });
 

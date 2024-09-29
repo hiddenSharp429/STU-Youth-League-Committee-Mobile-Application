@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 19:14:09
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-27 19:23:39
+ * @LastEditTime: 2024-09-29 14:59:51
  * @FilePath: /YLC/src/components/BottomTabNavigator.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -24,7 +24,7 @@ const tabItems = [
     selectedIcon: require('../../assets/icons/activity-apply-selected.png'),
   },
   {
-    name: 'ActivityHistory',
+    name: 'HistoryActivities',
     text: '活动历史',
     icon: require('../../assets/icons/activity-history.png'),
     selectedIcon: require('../../assets/icons/activity-history-selected.png'),
