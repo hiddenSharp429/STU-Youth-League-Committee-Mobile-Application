@@ -2,268 +2,311 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, Modal, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
-import BottomTabNavigator from '../components/BottomTabNavigator';
-const hourLists = ["9:00", "9:30", "10:00", "10:30", "11:00", "11:30", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"];
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addAppointment } from '../api/appointmentApi';
+import { getTeacherAppointments } from '../api/appointmentApi';
+const hourLists = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"];
+import BottomTabNavigation from '../components/BottomTabNavigator';
 
 const AppointmentPage = () => {
   const navigation = useNavigation();
-  const [openid, setOpenid] = useState('');
-  const [canUseProfile, setCanUseProfile] = useState(false);
-  const [orgArray, setOrgArray] = useState(['校团委', '学生会', '校青协', '汕大青年', '踹网', '社团中心', '研会', '主持队', '礼仪队']);
-  const [teacArray, setTeacArray] = useState(['姚溱', '陈益纯', '林煜', '林蔷', '罗列', '黄嘉曼']);
-  const [formArray, setFormArray] = useState(['线下', '线上']);
-  const [orgIndex, setOrgIndex] = useState(0);
-  const [teacIndex, setTeacIndex] = useState(0);
-  const [formIndex, setFormIndex] = useState(0);
-  const [content, setContent] = useState('');
-  const [subscriber, setSubscriber] = useState('');
-  const [subscriberPhone, setSubscriberPhone] = useState('');
-  const [timeList, setTimeList] = useState([]);
-  const [yyDay, setYyDay] = useState(2);
-  const [hourList, setHourList] = useState([
-    { hour: "9:00", n: 9, isShow: false },
-    { hour: "9:30", n: 9.5, isShow: false },
-    { hour: "10:00", n: 10, isShow: false },
-    { hour: "10:30", n: 10.5, isShow: false },
-    { hour: "11:00", n: 11, isShow: false },
-    { hour: "11:30", n: 11.5, isShow: false },
-    { hour: "14:30", n: 14.5, isShow: false },
-    { hour: "15:00", n: 15, isShow: false },
-    { hour: "15:30", n: 15.5, isShow: false },
-    { hour: "16:00", n: 16, isShow: false },
-    { hour: "16:30", n: 16.5, isShow: false },
-    { hour: "17:00", n: 17, isShow: false },
-  ]);
-  const [timeShow, setTimeShow] = useState(false);
-  const [currentTab, setCurrentTab] = useState(0);
-  const [chooseHour, setChooseHour] = useState('');
-  const [rankDay, setRankDay] = useState('');
-  const [chooseTime, setChooseTime] = useState('');
-  const [hourIndex, setHourIndex] = useState(-1);
-  const [yyTime, setYyTime] = useState('');
-  const [day, setDay] = useState('');
-  const [submitButton, setSubmitButton] = useState(false);
-
   const [timeModalVisible, setTimeModalVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedHour, setSelectedHour] = useState(null);
+
+  const organizations = ['校团委', '学生会', '校青协', '汕大青年', '踹网', '社团中心', '研会', '主持队', '礼仪队'];
+  const teachers = ['姚溱', '陈益纯', '林煜', '林蔷', '罗列', '黄嘉曼'];
+  const appointmentForms = ['线下', '线上'];
+
+  const [availableDate, setAvailableDate] = useState(null);
+  const [canSelectTime, setCanSelectTime] = useState(false);
+  const [formData, setFormData] = useState({
+    userId: '',
+    organization: organizations[0],
+    organizationId: 0,
+    teacher: teachers[0],
+    teacherId: 0,
+    //appointmentDate为当前日期的后一天
+    appointmentDate: new Date(new Date().setDate(new Date().getDate() + 1)),
+    appointmentTime: '',
+    appointmentForm: appointmentForms[0],
+    content: '',
+    subscriber: '',
+    subscriberPhone: '',
+  });
+
+  const [unavailableTimes, setUnavailableTimes] = useState([]);
+
+
 
   useEffect(() => {
-    // Initialize data, fetch user info, etc.
-    initializeData();
+    const getUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem('userId');
+        if (storedUserId) {
+          setFormData(prevData => ({ ...prevData, userId: storedUserId }));
+        } else {
+          Alert.alert('错误', '用户未登录');
+          navigation.navigate('ChoicePage');
+        }
+      } catch (error) {
+        console.error('获取用户 ID 失败:', error);
+      }
+    };
+
+    getUserId();
+
+    // 检查是否可以选择时间段
+    checkAvailableDate();
   }, []);
 
-  const initializeData = async () => {
-    // Implement data initialization logic here
-    // This would include fetching user info, setting up date lists, etc.
-    initializeTimeList();
-  };
-
-  const initializeTimeList = () => {
-    const today = new Date();
-    const timeList = [];
-    for (let i = 0; i < yyDay; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      timeList.push({
-        name: getWeekdayName(date.getDay()),
-        date: formatDate(date),
-        rank: formatDateRank(date),
-      });
+  const checkAvailableDate = () => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const dayOfWeek = tomorrow.getDay();
+    // const isValidDay = [1, 3, 4].includes(dayOfWeek); // 1: 周一, 3: 周三, 4: 周四
+    const isValidDay = [1, 2, 3, 4, 5, 6, 7].includes(dayOfWeek); // 1: 周一, 3: 周三, 4: 周四
+    // if (isValidDay && now.getHours() < 18) {
+    //   setAvailableDate(tomorrow);
+    //   setCanSelectTime(true);
+    // } else {
+    //   setAvailableDate(null);
+    //   setCanSelectTime(false);
+    // }
+    if (isValidDay && now.getHours() < 24) {
+      setAvailableDate(tomorrow);
+      setCanSelectTime(true);
+    } else {
+      setAvailableDate(null);
+      setCanSelectTime(false);
     }
-    setTimeList(timeList);
   };
 
-  const getWeekdayName = (day) => {
-    const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-    return weekdays[day];
-  };
+  const showTimeModel = async () => {
+    if (!canSelectTime) {
+      Alert.alert('提示', '当前不可选择时间段');
+      return;
+    }
 
-  const formatDate = (date) => {
-    return `${date.getMonth() + 1}-${date.getDate()}`;
-  };
-
-  const formatDateRank = (date) => {
-    return `${date.getMonth() + 1}.${date.getDate()}`;
-  };
-
-  const showTimeModel = () => {
-    setTimeModalVisible(true);
+    try {
+      const date = availableDate.toISOString().split('T')[0];
+      const appointments = await getTeacherAppointments(formData.teacherId, date);
+      console.log("appointments", appointments);
+      setUnavailableTimes(appointments); 
+      setTimeModalVisible(true);
+    } catch (error) {
+      console.error('获取老师预约信息失败:', error);
+      Alert.alert('错误', '获取可用时间段失败，请稍后再试');
+    }
   };
 
   const hideTimeModel = () => {
     setTimeModalVisible(false);
   };
 
-  const timeClick = (index) => {
-    setCurrentTab(index);
-    setSelectedDate(timeList[index]);
-    // 重置小时选择
-    setSelectedHour(null);
-    setHourIndex(-1);
-    
-    // 这里可以添加逻辑来更新可选的时间段
-    // 例如，检查是否是今天，如果是今天，则禁用已经过去的时间段
-    const updatedHourList = hourList.map(hour => {
-      if (index === 0) {
-        const now = new Date();
-        return { ...hour, isShow: now.getHours() < hour.n };
-      }
-      return { ...hour, isShow: true };
-    });
-    setHourList(updatedHourList);
-  };
-
-  const hourClick = (index) => {
-    if (!hourList[index].isShow) return;
-    setHourIndex(index);
-    setSelectedHour(hourList[index]);
-  };
-
-  const confirmTimeSelection = () => {
-    if (selectedDate && selectedHour) {
-      const formattedTime = `${selectedDate.date} ${selectedHour.hour}`;
-      setYyTime(formattedTime);
-      setDay(selectedDate.date);
-      setRankDay(parseFloat(selectedDate.rank) * 10000 + hourIndex);
-      hideTimeModel();
-    } else {
-      Alert.alert("请选择日期和时间");
-    }
-  };
-
   const handleSubmit = async () => {
-    if (!yyTime) {
-      Alert.alert("请选择预约时间");
+    if (!validateForm()) {
       return;
     }
-    // Implement submission logic
+
+    try {
+      const result = await addAppointment(formData);
+      if (result.success) {
+        Alert.alert('成功', result.message);
+        // 可以在这里添加导航到其他页面的逻辑
+      } else {
+        Alert.alert('错误', result.message);
+      }
+    } catch (error) {
+      console.error('提交预约失败:', error);
+      Alert.alert('错误', '提交预约失败,请稍后再试');
+    }
+  };
+
+  // 添加表单验证函数
+  const validateForm = () => {
+    // 实现表单验证逻辑
+    if (!formData.organization) {
+      Alert.alert('错误', '请选择所归属的组织');
+      return false;
+    }
+    if (!formData.teacher) {
+      Alert.alert('错误', '请选择预约的老师');
+      return false;
+    }
+    if (!formData.appointmentTime) {
+      Alert.alert('错误', '请选择预约的时间段');
+      return false;
+    }
+    if (!formData.appointmentForm) {
+      Alert.alert('错误', '请选择预约的形式');
+      return false;
+    }
+    if (!formData.content) {
+      Alert.alert('错误', '请输入预约事项');
+      return false;
+    }
+    if (!formData.subscriber) {
+      Alert.alert('错误', '请输入预约人姓名');
+      return false;
+    }
+    if (!formData.subscriberPhone) {
+      Alert.alert('错误', '请输入预约人联系方式');
+      return false;
+    }
+    
+    return true; // 如果验证通过,返回 true
   };
 
   return (
     <View style={styles.container}>
-        <ScrollView style={styles.container}>
-        <View style={styles.header}>
-            <Text style={styles.title}>预约老师</Text>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.appointment}>
+          <View style={styles.appointmentTitle}>
+            <Text style={styles.titleText}>预约老师</Text>
+          </View>
+
+          {/* 所归属的组织 */}
+          <View style={styles.formSection}>
+            <Text style={styles.subtitle}>所归属的组织:</Text>
+            <Picker
+              selectedValue={formData.organization}
+              onValueChange={(itemValue, itemIndex) => 
+                setFormData({...formData, organization: itemValue, organizationId: itemIndex})}
+              style={styles.picker}
+            >
+              {organizations.map((org, index) => (
+                <Picker.Item key={index} label={org} value={org} />
+              ))}
+            </Picker>
+          </View>
+
+          {/* 预约的老师 */}
+          <View style={styles.formSection}>
+            <Text style={styles.subtitle}>预约的老师:</Text>
+            <Picker
+              selectedValue={formData.teacher}
+              onValueChange={(itemValue, itemIndex) => 
+                setFormData({...formData, teacher: itemValue, teacherId: itemIndex})}
+              style={styles.picker}
+            >
+              {teachers.map((teacher, index) => (
+                <Picker.Item key={index} label={teacher} value={teacher} />
+              ))}
+            </Picker>
+          </View>
+
+          {/* 预约时间 */}
+          <View style={styles.formSection}>
+            <Text style={styles.subtitle}>预约时间:</Text>
+            {availableDate ? (
+              <Text>{availableDate.toDateString()}</Text>
+            ) : (
+              <Text>当前无可预约时间</Text>
+            )}
+            <TouchableOpacity 
+              onPress={showTimeModel} 
+              style={[styles.timePickerButton, !canSelectTime && styles.disabledButton]}
+              disabled={!canSelectTime}
+            >
+              <Text>{formData.appointmentTime || '选择时间段'}</Text>
+              <Icon name="clock-o" size={20} color="#000" />
+            </TouchableOpacity>
+          </View>
+
+          {/* 预约形式 */}
+          <View style={styles.formSection}>
+            <Text style={styles.subtitle}>约形式:</Text>
+            <Picker
+              selectedValue={formData.appointmentForm}
+              onValueChange={(itemValue) => setFormData({...formData, appointmentForm: itemValue})}
+              style={styles.picker}
+            >
+              {appointmentForms.map((form, index) => (
+                <Picker.Item key={index} label={form} value={form} />
+              ))}
+            </Picker>
+          </View>
+
+          {/* 预约事项 */}
+          <View style={styles.formSection}>
+            <Text style={styles.subtitle}>预约事项:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="请输入预约事项"
+              value={formData.content}
+              onChangeText={(text) => setFormData({...formData, content: text})}
+              multiline={true}
+              numberOfLines={4}
+            />
+          </View>
+
+          {/* 预约人信息 */}
+          <View style={styles.formSection}>
+            <Text style={styles.subtitle}>预约人信息:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="预约人姓名"
+              value={formData.subscriber}
+              onChangeText={(text) => setFormData({...formData, subscriber: text})}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="预约人联系方式"
+              value={formData.subscriberPhone}
+              onChangeText={(text) => setFormData({...formData, subscriberPhone: text})}
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitButtonText}>提交预约</Text>
+          </TouchableOpacity>
         </View>
+      </ScrollView>
+      <BottomTabNavigation />
 
-        <Text style={styles.subtitle}>所归属的组织:</Text>
-        <Picker
-            selectedValue={orgIndex}
-            onValueChange={(itemValue) => setOrgIndex(itemValue)}
-        >
-            {orgArray.map((item, index) => (
-            <Picker.Item key={index} label={item} value={index} />
-            ))}
-        </Picker>
-
-        <Text style={styles.subtitle}>预约的老师</Text>
-        <Picker
-            selectedValue={teacIndex}
-            onValueChange={(itemValue) => setTeacIndex(itemValue)}
-        >
-            {teacArray.map((item, index) => (
-            <Picker.Item key={index} label={item} value={index} />
-            ))}
-        </Picker>
-
-        <Text style={styles.subtitle}>预约事项</Text>
-        <TextInput
-            style={styles.input}
-            placeholder="预约事项"
-            onChangeText={setContent}
-            value={content}
-        />
-
-        <Text style={styles.subtitle}>预约形式</Text>
-        <Picker
-            selectedValue={formIndex}
-            onValueChange={(itemValue) => setFormIndex(itemValue)}
-        >
-            {formArray.map((item, index) => (
-            <Picker.Item key={index} label={item} value={index} />
-            ))}
-        </Picker>
-
-        <Text style={styles.subtitle}>预约时间:</Text>
-        <TouchableOpacity style={styles.timeButton} onPress={showTimeModel}>
-            <Text>{yyTime || '选择时间'}</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.subtitle}>预约人</Text>
-        <TextInput
-            style={styles.input}
-            placeholder="预约人姓名"
-            onChangeText={setSubscriber}
-            value={subscriber}
-        />
-
-        <Text style={styles.subtitle}>预约人手机号</Text>
-        <TextInput
-            style={styles.input}
-            placeholder="预约人联系方式"
-            onChangeText={setSubscriberPhone}
-            value={subscriberPhone}
-        />
-
-        <TouchableOpacity
-            style={styles.submitButton}
-            onPress={handleSubmit}
-            disabled={submitButton}
-        >
-            <Text style={styles.submitButtonText}>提交</Text>
-        </TouchableOpacity>
-
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={timeModalVisible}
-            onRequestClose={hideTimeModel}
-        >
-            <View style={styles.modalView}>
-            <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>选择预约的时间段</Text>
-                <ScrollView horizontal style={styles.dateScroll}>
-                {timeList.map((time, index) => (
-                    <TouchableOpacity
-                    key={index}
-                    style={[styles.dateItem, currentTab === index && styles.dateItemActive]}
-                    onPress={() => timeClick(index)}
-                    >
-                    <Text>{time.name}</Text>
-                    <Text>{time.date}</Text>
-                    </TouchableOpacity>
-                ))}
-                </ScrollView>
-                <View style={styles.hourGrid}>
-                {hourList.map((hour, index) => (
-                    <TouchableOpacity
-                    key={index}
-                    style={[
-                        styles.hourItem,
-                        !hour.isShow && styles.hourItemDisabled,
-                        hourIndex === index && styles.hourItemActive
-                    ]}
-                    onPress={() => hourClick(index)}
-                    disabled={!hour.isShow}
-                    >
-                    <Text>{hour.hour}</Text>
-                    </TouchableOpacity>
-                ))}
-                </View>
-                <TouchableOpacity style={styles.confirmButton} onPress={confirmTimeSelection}>
-                <Text style={styles.confirmButtonText}>确认</Text>
+      {/* 时间选择模态框 */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={timeModalVisible}
+        onRequestClose={hideTimeModel}
+      >
+        <View style={styles.modalView}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>选择预约的时间段</Text>
+            <View style={styles.timeGrid}>
+              {hourLists.map((time, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.timeItem,
+                    formData.appointmentTime === time && styles.timeItemActive,
+                    unavailableTimes.includes(time) && styles.timeItemDisabled
+                  ]}
+                  onPress={() => {
+                    if (!unavailableTimes.includes(time)) {
+                      setFormData({...formData, appointmentTime: time});
+                      hideTimeModel();
+                    }
+                  }}
+                  disabled={unavailableTimes.includes(time)}
+                >
+                  <Text style={unavailableTimes.includes(time) ? styles.timeItemTextDisabled : null}>
+                    {time}
+                  </Text>
                 </TouchableOpacity>
+              ))}
             </View>
-            </View>
-        </Modal>
-        </ScrollView>
-        <BottomTabNavigator />
+            <TouchableOpacity style={styles.closeButton} onPress={hideTimeModel}>
+              <Text style={styles.closeButtonText}>关闭</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
-
   );
 };
 
@@ -272,35 +315,53 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  scrollView: {
+    flex: 1,
+  },
+  appointment: {
+    padding: 20,
+  },
+  appointmentTitle: {
     marginBottom: 20,
   },
-  title: {
+  titleText: {
     fontSize: 24,
     fontWeight: 'bold',
   },
+  formSection: {
+    marginBottom: 20,
+  },
   subtitle: {
     fontSize: 18,
-    marginTop: 10,
-    marginBottom: 5,
+    marginBottom: 10,
+    color: '#333',
+  },
+  picker: {
+    backgroundColor: '#fff',
+    borderRadius: 5,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
+    backgroundColor: '#fff',
+    borderRadius: 5,
     padding: 10,
     marginBottom: 10,
-    borderRadius: 5,
   },
-  timeButton: {
-    borderWidth: 1,
-    borderColor: '#ddd',
+  datePickerButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 5,
     padding: 10,
     marginBottom: 10,
-    borderRadius: 5,
+  },
+  timePickerButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    padding: 10,
   },
   submitButton: {
     backgroundColor: '#D43030',
@@ -315,41 +376,36 @@ const styles = StyleSheet.create({
   },
   modalView: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    borderRadius: 20,
+    padding: 35,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: '80%',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 15,
   },
-  dateScroll: {
-    flexDirection: 'row',
-    marginBottom: 20,
-  },
-  dateItem: {
-    padding: 10,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-  },
-  dateItemActive: {
-    backgroundColor: '#D43030',
-  },
-  hourGrid: {
+  timeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  hourItem: {
+  timeItem: {
     width: '30%',
     padding: 10,
     marginBottom: 10,
@@ -358,23 +414,28 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
   },
-  hourItemDisabled: {
-    backgroundColor: '#f0f0f0',
-  },
-  hourItemActive: {
+  timeItemActive: {
     backgroundColor: '#D43030',
   },
-  confirmButton: {
-    backgroundColor: '#D43030',
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
+  closeButton: {
     marginTop: 20,
-    width: '100%',
+    padding: 10,
+    backgroundColor: '#D43030',
+    borderRadius: 5,
   },
-  confirmButtonText: {
+  closeButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  timeItemDisabled: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#ccc',
+  },
+  timeItemTextDisabled: {
+    color: '#999',
   },
 });
 
