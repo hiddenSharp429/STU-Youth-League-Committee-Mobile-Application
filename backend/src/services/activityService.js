@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 20:35:58
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-29 12:50:26
+ * @LastEditTime: 2024-09-29 23:05:19
  * @FilePath: /YLC/backend/src/services/activityService.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -43,7 +43,6 @@ class ActivityService {
 
   static async updateActivity(id, activityData) {
     try {
-      console.log('Updating activity in service:', id, 'with data:', activityData);
       const updatedActivity = await ActivityModel.updateActivity(id, activityData);
       let message;
       if (activityData.status === 2) {
