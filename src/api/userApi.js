@@ -2,14 +2,15 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 15:04:21
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-27 21:29:11
+ * @LastEditTime: 2024-09-28 23:15:47
  * @FilePath: /YLC/src/api/userApi.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import axios from 'axios';
 import { handleApiError } from './apiUtils';
+import { Platform } from 'react-native';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api';
 
 export const getUsers = async () => {
   try {

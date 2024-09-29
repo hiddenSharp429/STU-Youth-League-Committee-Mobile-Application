@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import DocumentPicker from 'react-native-document-picker';
-import { updateActivity } from '../api/activityApi';
+import { updateActivity, API_URL } from '../api/activityApi';
+import axios from 'axios';
 
 const SubmitActivitySummaryPage = () => {
   const route = useRoute();
@@ -14,6 +15,9 @@ const SubmitActivitySummaryPage = () => {
     practicalTotalMoney: '',
     practicalSponsorship: '',
     practicalApMoney: '',
+    satisfactionSurveyUrl: '',
+    fundDetailsUrl: '',
+    activityFilesUrl: '',
     publicityLinks: [''],
     oaLinks: [''],
   });
@@ -52,14 +56,13 @@ const SubmitActivitySummaryPage = () => {
 
   const pickDocument = async (type) => {
     try {
-      const result = await DocumentPicker.pick({
+      const res = await DocumentPicker.pick({
         type: [DocumentPicker.types.allFiles],
       });
-      setFiles(prev => ({ ...prev, [type]: result[0] }));
-      Alert.alert('成功', '文件上传成功');
+      setFiles(prev => ({ ...prev, [type]: res[0] }));
+      Alert.alert('成功', '文件选择成功');
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
-        // 用户取消了文件选择
         console.log('用户取消了文件选择');
       } else {
         console.error('文件选择失败', err);
@@ -68,25 +71,75 @@ const SubmitActivitySummaryPage = () => {
     }
   };
 
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append('file', {
+      uri: file.uri,
+      type: file.type,
+      name: file.name,
+    });
+
+    try {
+      const response = await axios.post(`${API_URL}/activity/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data.fileUrl;
+    } catch (error) {
+      console.error('文件上传失败', error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!summary.practicalMember || !summary.practicalTotalMoney) {
-      Alert.alert('错误', '请填写必要信息');
+    if (!validateForm()) {
       return;
     }
 
     try {
-      const updatedActivity = {
-        ...activity,
-        ...summary,
-        state: 3, // 假设 3 表示已提交总结
+      let updatedActivity = {
+        id: activity.id,
+        status: 1, 
+        practical_member: summary.practicalMember,
+        practical_total_money: summary.practicalTotalMoney,
+        practical_sponsorship: summary.practicalSponsorship,
+        practical_ap_money: summary.practicalApMoney,
+        publicity_links: JSON.stringify(summary.publicityLinks.filter(link => link.trim() !== '')),
+        oa_links: JSON.stringify(summary.oaLinks.filter(link => link.trim() !== '')),
       };
-      await updateActivity(updatedActivity);
+
+      // 上传文件
+      if (files.satisfaction) {
+        updatedActivity.satisfaction_survey_url = await uploadFile(files.satisfaction);
+      }
+      if (files.fund) {
+        updatedActivity.fund_details_url = await uploadFile(files.fund);
+      }
+      if (files.activityFiles) {
+        updatedActivity.activity_files_url = await uploadFile(files.activityFiles);
+      }
+
+      console.log('Updated activity:', updatedActivity);
+      const result = await updateActivity(updatedActivity);
       Alert.alert('成功', '活动总结提交成功', [
         { text: '确定', onPress: () => navigation.navigate('MyActivities', { needRefresh: true }) }
       ]);
     } catch (error) {
-      Alert.alert('错误', '提交失败');
+      Alert.alert('错误', '提交失败: ' + error.message);
     }
+  };
+
+  const validateForm = () => {
+    if (!summary.practicalMember || !summary.practicalTotalMoney) {
+      Alert.alert('错误', '请填写活动实际参与人数和总价');
+      return false;
+    }
+    if (!files.satisfaction || !files.fund || !files.activityFiles) {
+      Alert.alert('错误', '请上传所有必要的文件');
+      return false;
+    }
+    return true;
   };
 
   return (
@@ -106,7 +159,9 @@ const SubmitActivitySummaryPage = () => {
         <Text style={styles.subtitle}>2. 满意度调查情况（上传附件调查表）：</Text>
         <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument('satisfaction')}>
           <Image source={require('../../assets/icons/uploading.png')} style={styles.uploadIcon} />
-          <Text style={styles.uploadText}>上传文件 <Text style={styles.required}>*</Text></Text>
+          <Text style={styles.uploadText}>
+            {files.satisfaction ? files.satisfaction.name : '上传文件'} <Text style={styles.required}>*</Text>
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -135,7 +190,9 @@ const SubmitActivitySummaryPage = () => {
         />
         <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument('fund')}>
           <Image source={require('../../assets/icons/uploading3.png')} style={styles.uploadIcon} />
-          <Text style={styles.uploadText}>上传文件 <Text style={styles.required}>*</Text></Text>
+          <Text style={styles.uploadText}>
+            {files.fund ? files.fund.name : '上传文件'} <Text style={styles.required}>*</Text>
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -143,7 +200,9 @@ const SubmitActivitySummaryPage = () => {
         <Text style={styles.subtitle}>4. 活动文件（申报书，总结表，备忘录）：</Text>
         <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument('activityFiles')}>
           <Image source={require('../../assets/icons/uploading2.png')} style={styles.uploadIcon} />
-          <Text style={styles.uploadText}>上传文件 <Text style={styles.required}>*</Text></Text>
+          <Text style={styles.uploadText}>
+            {files.activityFiles ? files.activityFiles.name : '上传文件'} <Text style={styles.required}>*</Text>
+          </Text>
         </TouchableOpacity>
       </View>
 

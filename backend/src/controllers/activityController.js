@@ -2,11 +2,13 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 20:36:50
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-28 02:37:23
+ * @LastEditTime: 2024-09-29 11:50:03
  * @FilePath: /YLC/backend/src/controllers/activityController.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 const ActivityService = require('../services/activityService');
+const path = require('path');
+const fs = require('fs');
 
 class ActivityController {
   static async createActivity(req, res) {
@@ -70,6 +72,20 @@ class ActivityController {
     } catch (error) {
       console.error('Get activity by id error:', error);
       res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  static async uploadFile(req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: '没有文件上传' });
+      }
+
+      const fileUrl = `/uploads/${req.file.filename}`;
+      res.json({ success: true, fileUrl });
+    } catch (error) {
+      console.error('File upload error:', error);
+      res.status(500).json({ success: false, message: '文件上传失败' });
     }
   }
 }

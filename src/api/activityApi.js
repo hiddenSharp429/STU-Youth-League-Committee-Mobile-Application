@@ -2,14 +2,15 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 20:32:38
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-28 02:56:06
+ * @LastEditTime: 2024-09-29 12:51:23
  * @FilePath: /YLC/src/api/activityApi.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import axios from 'axios';
 import { handleApiError } from './apiUtils';
+import { Platform } from 'react-native';
 
-const API_URL = 'http://localhost:3000/api';
+export const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api';
 
 export const addActivity = async (activityData) => {
   try {
@@ -44,9 +45,11 @@ export const getMyActivitiesCount = async (userId, status) => {
 
 export const updateActivity = async (activityData) => {
   try {
+    console.log('Updating activity:', activityData);
     const response = await axios.put(`${API_URL}/activity/${activityData.id}`, activityData);
     return response.data;
   } catch (error) {
+    console.error('Update activity error:', error);
     throw handleApiError(error, '更新活动失败');
   }
 };

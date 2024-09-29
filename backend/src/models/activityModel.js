@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 20:35:32
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-28 02:37:54
+ * @LastEditTime: 2024-09-29 13:15:08
  * @FilePath: /YLC/backend/src/models/activityModel.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -119,12 +119,11 @@ class ActivityModel {
   }
 
   static async updateActivity(id, activityData) {
-    // 创建一个新对象，只包含我们想要更新的字段
     const updateData = { ...activityData };
     delete updateData.id;
     delete updateData.created_at;
     delete updateData.updated_at;
-  
+
     // 处理日期格式
     if (updateData.start_date) {
       updateData.start_date = new Date(updateData.start_date).toISOString().slice(0, 10);
@@ -132,21 +131,40 @@ class ActivityModel {
     if (updateData.end_date) {
       updateData.end_date = new Date(updateData.end_date).toISOString().slice(0, 10);
     }
-  
-    const fields = Object.keys(updateData);
-    const values = fields.map(field => updateData[field]);
-    const placeholders = fields.map(field => `${field} = ?`).join(', ');
-  
-    const query = `UPDATE activities SET ${placeholders}, status = 0 WHERE id = ?`;
+
+    let query;
+    let values;
+
+    if (updateData.status === 2) {
+      // 被驳回的活动重新提交
+      const fields = Object.keys(updateData);
+      values = fields.map(field => updateData[field]);
+      const placeholders = fields.map(field => `${field} = ?`).join(', ');
+      query = `UPDATE activities SET ${placeholders}, status = 0 WHERE id = ?`;
+    } else if (updateData.status === 1) {
+      // 已通过的活动提交总结
+      const summaryFields = [
+        'practical_member', 'practical_total_money', 'practical_sponsorship', 'practical_ap_money',
+        'satisfaction_survey_url', 'fund_details_url', 'activity_files_url', 'publicity_links', 'oa_links'
+      ];
+
+      const fieldsToUpdate = summaryFields.filter(field => updateData[field] !== undefined);
+      values = fieldsToUpdate.map(field => updateData[field]);
+      const placeholders = fieldsToUpdate.map(field => `${field.toLowerCase()} = ?`).join(', ');
+      query = `UPDATE activities SET ${placeholders}, status = 3 WHERE id = ?`;
+    } else {
+      throw new Error('Invalid activity status for update');
+    }
+
     values.push(id);
-  
+
     try {
       const [result] = await db.execute(query, values);
-  
+
       if (result.affectedRows === 0) {
         throw new Error('Activity not found or no changes made');
       }
-  
+
       return { ...updateData, id };
     } catch (error) {
       console.error('SQL Error:', error);
