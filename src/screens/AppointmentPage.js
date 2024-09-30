@@ -115,6 +115,9 @@ const AppointmentPage = () => {
       if (result.success) {
         Alert.alert('成功', result.message);
         // 可以在这里添加导航到其他页面的逻辑
+        navigation.navigate('AppointmentHistory', { 
+          needRefresh: true
+        });
       } else {
         Alert.alert('错误', result.message);
       }

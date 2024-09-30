@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-30 04:01:05
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-30 04:46:00
+ * @LastEditTime: 2024-09-30 12:28:31
  * @FilePath: /YLC/backend/src/models/appointmentModel.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -36,12 +36,37 @@ class AppointmentModel {
   }
 
   static async getUserAppointments(userId, status, offset, limit) {
-    const query = `SELECT * FROM appointments 
-      WHERE userId = ? AND status = ? 
-      ORDER BY appointmentDate DESC, appointmentTime DESC 
-      LIMIT ? OFFSET ?`;
+    // 确保 offset 和 limit 是数字
+    offset = parseInt(offset, 10);
+    limit = parseInt(limit, 10);
     
-    const [rows] = await db.execute(query, [userId, status, limit, offset]);
+    // status为数组，获取status最大值和最小值
+    const maxStatus = Math.max(...status);
+    const minStatus = Math.min(...status);
+    
+    // 添加一些错误检查
+    if (isNaN(offset) || isNaN(limit) || offset < 0 || limit < 0) {
+      throw new Error('Invalid offset or limit');
+    }
+    
+    // 首先获取总记录数
+    const [countResult] = await db.execute(
+      'SELECT COUNT(*) as total FROM appointments WHERE userId = ?',
+      [userId]
+    );
+    const total = countResult[0].total;
+        
+    // 如果没有记录，直接返回空数组
+    if (total === 0) {
+      return [];
+    }
+
+    const query = `SELECT * FROM appointments 
+      WHERE userId = ? AND status >= ? AND status <= ?
+      ORDER BY appointmentDate DESC, appointmentTime DESC 
+      LIMIT ${limit} OFFSET ${offset}`;
+    
+    const [rows] = await db.execute(query, [userId, minStatus, maxStatus, limit, offset]);
     return rows;
   }
 

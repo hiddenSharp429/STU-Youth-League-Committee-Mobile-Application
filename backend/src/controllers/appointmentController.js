@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-30 04:02:05
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-30 04:37:33
+ * @LastEditTime: 2024-09-30 12:26:24
  * @FilePath: /YLC/backend/src/controllers/appointmentController.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -25,9 +25,8 @@ class AppointmentController {
       const { userId } = req.params;
       const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
       const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
-      const status = parseInt(req.query.status, 10);
-
-      if (isNaN(page) || isNaN(limit) || isNaN(status)) {
+      const status = req.query.status ? req.query.status.split(',').map(Number) : [0,1,2];
+      if (isNaN(page) || isNaN(limit)) {
         return res.status(400).json({ success: false, message: 'Invalid parameters' });
       }
 
