@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-30 04:02:05
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-30 12:26:24
+ * @LastEditTime: 2024-10-01 13:16:21
  * @FilePath: /YLC/backend/src/controllers/appointmentController.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -91,6 +91,46 @@ class AppointmentController {
       res.json(appointments);
     } catch (error) {
       console.error('Get teacher appointments error:', error);
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  static async getAllAppointments(req, res) {
+    try {
+      const status = req.query.status ? parseInt(req.query.status, 10) : null;
+      if (req.query.status && isNaN(status)) {
+        return res.status(400).json({ success: false, message: 'Invalid status parameter' });
+      }
+      const appointments = await AppointmentService.getAllAppointments(status);
+      res.json(appointments);
+    } catch (error) {
+      console.error('Get all appointments error:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  static async approveAppointment(req, res) {
+    try {
+      const { id } = req.params;
+      const result = await AppointmentService.updateAppointment(id, { status: 1 });
+      res.json(result);
+    } catch (error) {
+      console.error('Approve appointment error:', error);
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  static async rejectAppointment(req, res) {
+    try {
+      const { id } = req.params;
+      const { rejectReason } = req.body;
+      if (!rejectReason) {
+        return res.status(400).json({ success: false, message: '驳回理由不能为空' });
+      }
+      const result = await AppointmentService.updateAppointment(id, { status: 2, rejectReason });
+      res.json(result);
+    } catch (error) {
+      console.error('Reject appointment error:', error);
       res.status(400).json({ success: false, message: error.message });
     }
   }

@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-09-24 21:47:28
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-30 12:14:56
+ * @LastEditTime: 2024-09-30 19:21:43
  * @FilePath: /YLC/src/navigation/AppNavigator.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -24,6 +24,7 @@ import SubmitActivitySummaryPage from '../screens/SubmitActivitySummaryPage';
 import HistoryActivitiesPage from '../screens/HistoryActivitiesPage';
 import AppointmentPage from '../screens/AppointmentPage';
 import HistoryAppointmentsPage from '../screens/HistoryAppointmentsPage';
+import TeacherAppointmentApprovalPage from '../screens/TeacherAppointmentApprovalPage';
 // 导入其他页面...
 
 const Stack = createStackNavigator();
@@ -51,6 +52,7 @@ function AppNavigator() {
         <Stack.Screen name="HistoryActivities" component={HistoryActivitiesPage}/>
         <Stack.Screen name="Appointment" component={AppointmentPage}/>
         <Stack.Screen name="AppointmentHistory" component={HistoryAppointmentsPage}/>
+        <Stack.Screen name="TeacherAppointmentApproval" component={TeacherAppointmentApprovalPage}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-30 04:01:05
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-30 12:28:31
+ * @LastEditTime: 2024-10-01 13:15:27
  * @FilePath: /YLC/backend/src/models/appointmentModel.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -79,9 +79,18 @@ class AppointmentModel {
   }
 
   static async updateAppointment(id, appointmentData) {
-    const { status } = appointmentData;
-    const query = 'UPDATE appointments SET status = ? WHERE id = ?';
-    const [result] = await db.execute(query, [status, id]);
+    const { status, rejectReason } = appointmentData;
+    let query = 'UPDATE appointments SET status = ?';
+    let params = [status, id];
+
+    if (rejectReason) {
+      query += ', rejectReason = ?';
+      params.splice(1, 0, rejectReason);
+    }
+
+    query += ' WHERE id = ?';
+
+    const [result] = await db.execute(query, params);
     return result.affectedRows > 0;
   }
 
@@ -101,6 +110,17 @@ class AppointmentModel {
     `;
     const [rows] = await db.execute(query, [teacherId, date]);
     return rows.map(row => row.appointmentTime.slice(0, 5)); // 只返回小时和分钟
+  }
+
+  static async getAllAppointments(status) {
+    let query = 'SELECT * FROM appointments';
+    let params = [];
+    if (status !== null) {
+      query += ' WHERE status = ?';
+      params.push(status);
+    }
+    const [rows] = await db.execute(query, params);
+    return rows;
   }
 }
 

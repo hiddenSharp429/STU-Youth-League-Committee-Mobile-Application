@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Linking, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getActivityById } from '../api/activityApi';
+import { approveAppointment, rejectAppointment } from '../api/appointmentApi';
 
 const EventDetailPage = () => {
   const route = useRoute();
@@ -11,6 +12,7 @@ const EventDetailPage = () => {
   const [data, setData] = useState(route.params.activity || route.params.appointment);
 
   const isAppointment = type === 'appointment';
+  const isTeacher = user === 'tec';
 
   useFocusEffect(
     useCallback(() => {
@@ -40,6 +42,48 @@ const EventDetailPage = () => {
 
   const handleSubmitSummary = () => {
     navigation.navigate('SubmitActivitySummary', { activity: data });
+  };
+
+  const handleApprove = async () => {
+    try {
+      await approveAppointment(appointmentId);
+      Alert.alert('成功', '预约已通过');
+      setData({ ...data, status: 1 });
+    } catch (error) {
+      console.error('审批失败:', error);
+      Alert.alert('错误', '审批失败');
+    }
+  };
+
+  const handleReject = () => {
+    Alert.prompt(
+      '驳回预约',
+      '请输入驳回理由:',
+      [
+        {
+          text: '取消',
+          style: 'cancel',
+        },
+        {
+          text: '确认',
+          onPress: async (reason) => {
+            if (!reason || reason.trim() === '') {
+              Alert.alert('错误', '请输入驳回理由');
+              return;
+            }
+            try {
+              await rejectAppointment(appointmentId, reason);
+              Alert.alert('成功', '预约已驳回');
+              setData({ ...data, status: 2, rejectReason: reason });
+            } catch (error) {
+              console.error('驳回失败:', error);
+              Alert.alert('错误', '驳回失败');
+            }
+          },
+        },
+      ],
+      'plain-text'
+    );
   };
 
   const renderEditButton = () => {
@@ -247,6 +291,13 @@ const EventDetailPage = () => {
         {renderSection('姓名', data.subscriber)}
         {renderSection('联系方式', data.subscriberPhone)}
       </View>
+
+      {data.status === 2 && data.rejectReason && (
+        <View style={styles.infoContainer}>
+          <Text style={styles.sectionHeader}>驳回理由</Text>
+          <Text style={styles.sectionContent}>{data.rejectReason}</Text>
+        </View>
+      )}
     </>
   );
 
@@ -280,6 +331,22 @@ const EventDetailPage = () => {
     );
   };
 
+  const renderApprovalButtons = () => {
+    if (isAppointment && isTeacher && data.status === 0) {
+      return (
+        <View style={styles.approvalButtonsContainer}>
+          <TouchableOpacity style={styles.approveButton} onPress={handleApprove}>
+            <Text style={styles.buttonText}>通过</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.rejectButton} onPress={handleReject}>
+            <Text style={styles.buttonText}>驳回</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return null;
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -298,6 +365,7 @@ const EventDetailPage = () => {
         {renderStepBar()}
         {renderEditButton()}
         {renderSubmitSummaryButton()}
+        {renderApprovalButtons()}
       </View>
 
       {isAppointment ? renderAppointmentDetails() : renderActivityDetails()}
@@ -413,6 +481,30 @@ const styles = StyleSheet.create({
   },
   fileLinkText: {
     marginLeft: 5,
+  },
+  approvalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  approveButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginRight: 5,
+  },
+  rejectButton: {
+    backgroundColor: '#F44336',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginLeft: 5,
+  },
+  buttonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
 });
 

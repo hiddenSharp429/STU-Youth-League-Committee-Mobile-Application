@@ -55,6 +55,8 @@ const ChoicePage = () => {
     console.log(`Logging in to ${approvalType} approval system`);
     // 可以根据 approvalType 调用不同的登录 API
     // 登录成功后，可以导航到相应的页面
+    navigation.navigate('TeacherAppointmentApproval');
+    setShowApprovalOverlay(false);
   };
 
   const goIndex = async () => {
