@@ -1,79 +1,103 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+<!--
+ * @Author: hiddenSharp429 z404878860@163.com
+ * @Date: 2024-09-24 11:58:33
+ * @LastEditors: hiddenSharp429 z404878860@163.com
+ * @LastEditTime: 2024-10-05 23:47:33
+ * @FilePath: /YLC/README.md
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+# STU-团团活动管理系统
 
-# Getting Started
+## 项目概述
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+这是一个综合的活动管理系统，主要用于管理和审批各种活动和预约。系统包括教师和学生两个主要用户角色，提供活动创建、审批、查看和管理等功能。
 
-## Step 1: Start the Metro Server
+## 主要功能
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+1. 活动管理
+   - 创建新活动
+   - 查看活动列表
+   - 活动详情查看
+   - 活动状态更新（审批、驳回、提交总结等）
 
-To start Metro, run the following command from the _root_ of your React Native project:
+2. 预约管理
+   - 创建预约
+   - 预约审批
+   - 预约状态查看
 
-```bash
-# using npm
-npm start
+3. 用户角色
+   - 教师：可以审批活动和预约
+   - 学生：可以创建活动和预约，提交活动总结(包括不受限预约用户)
 
-# OR using Yarn
-yarn start
-```
+4. 状态流程
+   - 活动状态：待审核(0) -> 已通过(1) -> 已提交总结(3) -> 已结束(4)
+   - 驳回状态：已驳回(2)
 
-## Step 2: Start your Application
+## 技术栈
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+- 前端：React Native
+- 后端：Node.js, Express
+- 数据库：MySQL
 
-### For Android
+## 主要组件
 
-```bash
-# using npm
-npm run android
+1. TeacherActivityApprovalPage：教师活动审批页面
+2. EventDetailPage：活动/预约详情页面
+3. ActivityModel：活动数据模型
+4. ActivityService：活动相关业务逻辑
+5. ActivityController：活动相关API控制器
 
-# OR using Yarn
-yarn android
-```
+## 安装和运行
 
-### For iOS
+1. 克隆仓库
+   ```
+   git clone [仓库URL]
+   ```
 
-```bash
-# using npm
-npm run ios
+2. 安装依赖
+   ```
+   cd [项目目录]
+   npm install
+   ```
 
-# OR using Yarn
-yarn ios
-```
+3. 运行后端服务器
+   ```
+   cd backend
+   npm run dev
+   ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+4. 运行前端应用（在新的终端窗口）
+   ```
+   cd [项目目录]
+   npx react-native run-android  # 对于Android
+   # 或
+   npx react-native run-ios      # 对于iOS
+   ```
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+## API 接口
 
-## Step 3: Modifying your App
+- GET /api/activity/get/all：获取所有活动
+- PUT /api/activity/:id/approve：审批通过活动
+- PUT /api/activity/:id/reject：驳回活动
+- GET /api/activity/:id：获取单个活动详情
+- GET /api/appointment/get/all：获取所有预约
+- PUT /api/appointment/:id/approve：审批通过预约
+- PUT /api/appointment/:id/reject：驳回预约
+- GET /api/appointment/:id：获取单个预约详情 
+......
 
-Now that you have successfully run the app, let's modify it.
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+## 贡献指南
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+欢迎贡献代码，请遵循以下步骤：
 
-## Congratulations! :tada:
+1. Fork 本仓库
+2. 创建您的特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交您的更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 打开一个 Pull Request
 
-You've successfully run and modified your React Native App. :partying_face:
 
-### Now what?
+## 联系方式
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+[hiddenSharp429](https://github.com/hiddenSharp429)

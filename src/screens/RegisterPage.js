@@ -12,6 +12,7 @@ const RegisterScreen = () => {
   const [inviteCode, setInviteCode] = useState('');
   const [isCheck, setIsCheck] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isVip, setIsVip] = useState(false);
 
   const route = useRoute();
   const navigation = useNavigation();
@@ -30,25 +31,6 @@ const RegisterScreen = () => {
     }
   };
 
-  const handleRegister = async () => {
-    if (!account || !password || !name || !isCheck) {
-      Alert.alert('错误', '请填写所有信息并验证邀请码');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await registerUser(account, password, name, type, inviteCode);
-      Alert.alert('成功', '注册成功', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
-    } catch (error) {
-      Alert.alert('错误', error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const checkInviteCodeHandler = async () => {
     if (!inviteCode) {
       Alert.alert('错误', '请输入邀请码');
@@ -57,9 +39,29 @@ const RegisterScreen = () => {
 
     setIsLoading(true);
     try {
-      await checkInviteCode(inviteCode, type);
+      const result = await checkInviteCode(inviteCode, type);
       setIsCheck(true);
-      Alert.alert('成功', '邀请码验证成功');
+      setIsVip(result.isVip);
+      Alert.alert('成功', result.isVip ? 'VIP邀请码验证成功' : '邀请码验证成功');
+    } catch (error) {
+      Alert.alert('错误', error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!account || !password || !name || !isCheck) {
+      Alert.alert('错误', '请填写所有信息并验证邀请码');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await registerUser(account, password, name, isVip ? 3 : type, inviteCode);
+      Alert.alert('成功', `注册成功${result.isVip ? '，您是VIP用户' : ''}`, [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]);
     } catch (error) {
       Alert.alert('错误', error.message);
     } finally {

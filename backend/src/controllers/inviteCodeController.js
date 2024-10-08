@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 21:16:05
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-27 21:17:56
+ * @LastEditTime: 2024-10-05 23:31:02
  * @FilePath: /YLC/backend/src/controllers/inviteCodeController.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -11,8 +11,9 @@ const InviteCodeService = require('../services/inviteCodeService');
 class InviteCodeController {
   static async checkInviteCode(req, res) {
     try {
-      const { inviteCode, type } = req.body;
-      const result = await InviteCodeService.checkInviteCode(inviteCode, type);
+      const { code, type } = req.body;
+      console.log(code, type);
+      const result = await InviteCodeService.checkInviteCode(code, type);
       res.json(result);
     } catch (error) {
       console.error('Check invite code error:', error);

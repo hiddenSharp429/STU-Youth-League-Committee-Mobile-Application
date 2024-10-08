@@ -4,6 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserById } from '../api/userApi';
 import { addAppointment } from '../api/appointmentApi';
 import { getTeacherAppointments } from '../api/appointmentApi';
 const hourLists = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"];
@@ -35,25 +36,29 @@ const AppointmentPage = () => {
   });
 
   const [unavailableTimes, setUnavailableTimes] = useState([]);
+  const [isVip, setIsVip] = useState(false);
+  const [selectedTimes, setSelectedTimes] = useState([]);
 
 
 
   useEffect(() => {
-    const getUserId = async () => {
+    const getUserInfo = async () => {
       try {
         const storedUserId = await AsyncStorage.getItem('userId');
-        if (storedUserId) {
+        const userInfo = await getUserById(storedUserId);
+        if (userInfo) {
           setFormData(prevData => ({ ...prevData, userId: storedUserId }));
+          setIsVip(userInfo.unrestricted);
         } else {
           Alert.alert('错误', '用户未登录');
           navigation.navigate('ChoicePage');
         }
       } catch (error) {
-        console.error('获取用户 ID 失败:', error);
+        console.error('获取用户信息失败:', error);
       }
     };
 
-    getUserId();
+    getUserInfo();
 
     // 检查是否可以选择时间段
     checkAvailableDate();
@@ -63,24 +68,24 @@ const AppointmentPage = () => {
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
     const dayOfWeek = tomorrow.getDay();
-    // const isValidDay = [1, 3, 4].includes(dayOfWeek); // 1: 周一, 3: 周三, 4: 周四
-    const isValidDay = [1, 2, 3, 4, 5, 6, 7].includes(dayOfWeek); // 1: 周一, 3: 周三, 4: 周四
-    // if (isValidDay && now.getHours() < 18) {
-    //   setAvailableDate(tomorrow);
-    //   setCanSelectTime(true);
-    // } else {
-    //   setAvailableDate(null);
-    //   setCanSelectTime(false);
-    // }
-    if (isValidDay && now.getHours() < 24) {
+    console.log("dayOfWeek", dayOfWeek);
+    const isValidDay = [2, 4, 5].includes(dayOfWeek); // 2: 周一, 4: 周三, 5: 周四
+    // const isValidDay = [1, 2, 3, 4, 5, 6, 7].includes(dayOfWeek); // 1: 周一, 3: 周三, 4: 周四
+    if (isValidDay && now.getHours() < 18) {
       setAvailableDate(tomorrow);
       setCanSelectTime(true);
     } else {
       setAvailableDate(null);
       setCanSelectTime(false);
     }
+    // if (isValidDay && now.getHours() < 24) {
+    //   setAvailableDate(tomorrow);
+    //   setCanSelectTime(true);
+    // } else {
+    //   setAvailableDate(null);
+    //   setCanSelectTime(false);
+    // }
   };
 
   const showTimeModel = async () => {

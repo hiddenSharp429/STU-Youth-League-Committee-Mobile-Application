@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 20:35:58
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-29 23:05:19
+ * @LastEditTime: 2024-10-05 00:33:44
  * @FilePath: /YLC/backend/src/services/activityService.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -64,6 +64,39 @@ class ActivityService {
     } catch (error) {
       console.error('Get activity by id error:', error);
       throw new Error('获取活动详情失败: ' + error.message);
+    }
+  }
+
+  static async getAllActivities(status) {
+    try {
+      const activities = await ActivityModel.getAllActivities(status);
+      return activities;
+    } catch (error) {
+      console.error('Get all activities error:', error);
+      throw new Error('获取所有活动失败: ' + error.message);
+    }
+  }
+
+  static async approveActivity(id, status) {
+    try {
+      const result = await ActivityModel.approveActivity(id, status);
+      return result;
+    } catch (error) {
+      console.error('Approve activity error:', error);
+      throw new Error('审批活动失败: ' + error.message);
+    }
+  }
+
+  static async rejectActivity(id, reason) {
+    try {
+      if (!reason || reason.trim() === '') {
+        throw new Error('驳回理由不能为空');
+      }
+      const result = await ActivityModel.rejectActivity(id, reason);
+      return result;
+    } catch (error) {
+      console.error('Reject activity error:', error);
+      throw new Error('驳回活动失败: ' + error.message);
     }
   }
 }

@@ -54,8 +54,32 @@ const ChoicePage = () => {
     // 这里实现审批端登录逻辑
     console.log(`Logging in to ${approvalType} approval system`);
     // 可以根据 approvalType 调用不同的登录 API
-    // 登录成功后，可以导航到相应的页面
-    navigation.navigate('TeacherAppointmentApproval');
+    // 预约端
+    if (approvalType === 'appointment') {
+      try {
+        const response = await loginUser(account, password, 2);
+        if (response.success) {
+        navigation.navigate('TeacherAppointmentApproval');
+      } else {
+        Alert.alert('错误', response.message);
+        }
+      } catch (error) {
+        handleLoginError(error);
+      }
+    }
+    // 活动端
+    else if (approvalType === 'activity') {
+      try {
+        const response = await loginUser(account, password, 1);
+        if (response.success) {
+          navigation.navigate('TeacherActivityApproval');
+        } else {
+          Alert.alert('错误', response.message);
+        }
+      } catch (error) {
+        handleLoginError(error);
+      }
+    }
     setShowApprovalOverlay(false);
   };
 
@@ -133,7 +157,7 @@ const ChoicePage = () => {
     setIsLoading(true);
 
     try {
-      const response = await loginUser(account, password);
+      const response = await loginUser(account, password, 0);
       await handleLoginSuccess(response);
       navigateToMyActivities();
     } catch (error) {

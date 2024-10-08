@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 20:35:32
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-29 15:03:44
+ * @LastEditTime: 2024-10-05 23:02:54
  * @FilePath: /YLC/backend/src/models/activityModel.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -180,6 +180,33 @@ class ActivityModel {
       throw new Error('Activity not found');
     }
     return rows[0];
+  }
+
+  static async getAllActivities(status) {
+    const statusNumber = parseInt(status, 10);
+    const [rows] = await db.execute('SELECT * FROM activities WHERE status = ?', [statusNumber]);
+    if (rows.length === 0) {
+      return [];
+    }
+    return rows;
+  } 
+
+  static async approveActivity(id, status) {
+    const query = 'UPDATE activities SET status = ? WHERE id = ?';
+    const [result] = await db.execute(query, [status, id]); 
+    if (result.affectedRows === 0) {
+      throw new Error('Activity not found or already approved');
+    }
+    return { success: true, message: '活动已通过审批' };
+  }
+
+  static async rejectActivity(id, reason) {
+    const query = 'UPDATE activities SET status = 2, reject_reason = ? WHERE id = ?';
+    const [result] = await db.execute(query, [reason, id]);
+    if (result.affectedRows === 0) {
+      throw new Error('Activity not found or already rejected');
+    }
+    return { success: true, message: '活动已驳回' };
   }
 }
 

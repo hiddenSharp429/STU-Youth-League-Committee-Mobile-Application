@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Linking, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
-import { getActivityById } from '../api/activityApi';
+import { getActivityById, approveActivity, rejectActivity } from '../api/activityApi';
 import { approveAppointment, rejectAppointment } from '../api/appointmentApi';
 
 const EventDetailPage = () => {
@@ -44,26 +44,23 @@ const EventDetailPage = () => {
     navigation.navigate('SubmitActivitySummary', { activity: data });
   };
 
-  const handleApprove = async () => {
+  const handleApproveAppointment = async () => {
     try {
       await approveAppointment(appointmentId);
       Alert.alert('成功', '预约已通过');
       setData({ ...data, status: 1 });
     } catch (error) {
-      console.error('审批失败:', error);
-      Alert.alert('错误', '审批失败');
+      console.error('审批预约失败:', error);
+      Alert.alert('错误', '审批预约失败');
     }
   };
 
-  const handleReject = () => {
+  const handleRejectAppointment = () => {
     Alert.prompt(
       '驳回预约',
       '请输入驳回理由:',
       [
-        {
-          text: '取消',
-          style: 'cancel',
-        },
+        { text: '取消', style: 'cancel' },
         {
           text: '确认',
           onPress: async (reason) => {
@@ -76,8 +73,53 @@ const EventDetailPage = () => {
               Alert.alert('成功', '预约已驳回');
               setData({ ...data, status: 2, rejectReason: reason });
             } catch (error) {
-              console.error('驳回失败:', error);
-              Alert.alert('错误', '驳回失败');
+              console.error('驳回预约失败:', error);
+              Alert.alert('错误', '驳回预约失败');
+            }
+          },
+        },
+      ],
+      'plain-text'
+    );
+  };
+
+  const handleApproveActivity = async (status) => {
+    try {
+      if (status === 0) {
+        await approveActivity(activityId, 1);
+      } else if (status === 1) {
+        await approveActivity(activityId, 3);
+      } else if (status === 3) {
+        await approveActivity(activityId, 4);
+      }
+      Alert.alert('成功', '活动已通过');
+      setData({ ...data, status: 1 });
+    } catch (error) {
+      console.error('审批活动失败:', error);
+      Alert.alert('错误', '审批活动失败');
+    }
+  };
+
+  const handleRejectActivity = () => {
+    Alert.prompt(
+      '驳回活动',
+      '请输入驳回理由:',
+      [
+        { text: '取消', style: 'cancel' },
+        {
+          text: '确认',
+          onPress: async (reason) => {
+            if (!reason || reason.trim() === '') {
+              Alert.alert('错误', '请输入驳回理由');
+              return;
+            }
+            try {
+              await rejectActivity(activityId);
+              Alert.alert('成功', '活动已驳回');
+              setData({ ...data, status: 2, rejectReason: reason });
+            } catch (error) {
+              console.error('驳回活动失败:', error);
+              Alert.alert('错误', '驳回活动失败');
             }
           },
         },
@@ -332,17 +374,35 @@ const EventDetailPage = () => {
   };
 
   const renderApprovalButtons = () => {
-    if (isAppointment && isTeacher && data.status === 0) {
-      return (
-        <View style={styles.approvalButtonsContainer}>
-          <TouchableOpacity style={styles.approveButton} onPress={handleApprove}>
-            <Text style={styles.buttonText}>通过</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.rejectButton} onPress={handleReject}>
-            <Text style={styles.buttonText}>驳回</Text>
-          </TouchableOpacity>
-        </View>
-      );
+    if (isTeacher) {
+      if (isAppointment && data.status === 0) {
+        return (
+          <View style={styles.approvalButtonsContainer}>
+            <TouchableOpacity style={styles.approveButton} onPress={handleApproveAppointment}>
+              <Text style={styles.buttonText}>通过预约</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.rejectButton} onPress={handleRejectAppointment}>
+              <Text style={styles.buttonText}>驳回预约</Text>
+            </TouchableOpacity>
+          </View>
+        );
+      } else {
+        if (data.status === 0 || data.status === 1 || data.status === 3) {
+          return (
+            <View style={styles.approvalButtonsContainer}>
+              <TouchableOpacity 
+                style={styles.approveButton} 
+                onPress={() => handleApproveActivity(data.status)}
+              >
+                <Text style={styles.buttonText}>通过活动</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.rejectButton} onPress={handleRejectActivity}>
+                <Text style={styles.buttonText}>驳回活动</Text>
+              </TouchableOpacity>
+            </View>
+          );
+        }
+      }
     }
     return null;
   };

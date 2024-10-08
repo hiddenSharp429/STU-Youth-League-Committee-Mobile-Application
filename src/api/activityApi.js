@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 20:32:38
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-29 12:51:23
+ * @LastEditTime: 2024-10-05 00:31:14
  * @FilePath: /YLC/src/api/activityApi.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -60,5 +60,32 @@ export const getActivityById = async (activityId) => {
     return response.data;
   } catch (error) {
     throw handleApiError(error, '获取活动详情失败');
+  }
+};
+
+export const getAllActivities = async (status) => {
+  try {
+    const response = await axios.get(`${API_URL}/activity/get/all`, { params: { status } });
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, '获取所有活动失败');
+  }
+};
+
+export const approveActivity = async (activityId, status) => {
+  try {
+    const response = await axios.put(`${API_URL}/activity/${activityId}/approve`, { status });
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, '审批活动失败');
+  }
+};
+
+export const rejectActivity = async (activityId) => {
+  try {
+    const response = await axios.put(`${API_URL}/activity/${activityId}/reject`);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, '驳回活动失败');
   }
 };
