@@ -9,7 +9,7 @@ import { addAppointment } from '../api/appointmentApi';
 import { getTeacherAppointments } from '../api/appointmentApi';
 const hourLists = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"];
 import BottomTabNavigation from '../components/BottomTabNavigator';
-
+import globalStyles from '../config/globalStyles';
 const AppointmentPage = () => {
   const navigation = useNavigation();
   const [timeModalVisible, setTimeModalVisible] = useState(false);
@@ -70,22 +70,22 @@ const AppointmentPage = () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const dayOfWeek = tomorrow.getDay();
     console.log("dayOfWeek", dayOfWeek);
-    const isValidDay = [2, 4, 5].includes(dayOfWeek); // 2: 周一, 4: 周三, 5: 周四
-    // const isValidDay = [1, 2, 3, 4, 5, 6, 7].includes(dayOfWeek); // 1: 周一, 3: 周三, 4: 周四
-    if (isValidDay && now.getHours() < 18) {
-      setAvailableDate(tomorrow);
-      setCanSelectTime(true);
-    } else {
-      setAvailableDate(null);
-      setCanSelectTime(false);
-    }
-    // if (isValidDay && now.getHours() < 24) {
+    // const isValidDay = [2, 4, 5].includes(dayOfWeek); // 2: 周一, 4: 周三, 5: 周四
+    const isValidDay = [0, 1, 2, 3, 4, 5, 6].includes(dayOfWeek); // 1: 周一, 3: 周三, 4: 周四
+    // if (isValidDay && now.getHours() < 18) {
     //   setAvailableDate(tomorrow);
     //   setCanSelectTime(true);
     // } else {
     //   setAvailableDate(null);
     //   setCanSelectTime(false);
     // }
+    if (isValidDay && now.getHours() < 24) {
+      setAvailableDate(tomorrow);
+      setCanSelectTime(true);
+    } else {
+      setAvailableDate(null);
+      setCanSelectTime(false);
+    }
   };
 
   const showTimeModel = async () => {
@@ -209,16 +209,16 @@ const AppointmentPage = () => {
           <View style={styles.formSection}>
             <Text style={styles.subtitle}>预约时间:</Text>
             {availableDate ? (
-              <Text>{availableDate.toDateString()}</Text>
+              <Text style={globalStyles.text}>{availableDate.toDateString()}</Text>
             ) : (
-              <Text>当前无可预约时间</Text>
+              <Text style={globalStyles.text}>当前无可预约时间</Text>
             )}
             <TouchableOpacity 
               onPress={showTimeModel} 
               style={[styles.timePickerButton, !canSelectTime && styles.disabledButton]}
               disabled={!canSelectTime}
             >
-              <Text>{formData.appointmentTime || '选择时间段'}</Text>
+              <Text style={globalStyles.text}>{formData.appointmentTime || '选择时间段'}</Text>
               <Icon name="clock-o" size={20} color="#000" />
             </TouchableOpacity>
           </View>
@@ -243,6 +243,7 @@ const AppointmentPage = () => {
             <TextInput
               style={styles.input}
               placeholder="请输入预约事项"
+              placeholderTextColor={globalStyles.placeholderText.color}
               value={formData.content}
               onChangeText={(text) => setFormData({...formData, content: text})}
               multiline={true}
@@ -256,12 +257,14 @@ const AppointmentPage = () => {
             <TextInput
               style={styles.input}
               placeholder="预约人姓名"
+              placeholderTextColor={globalStyles.placeholderText.color}
               value={formData.subscriber}
               onChangeText={(text) => setFormData({...formData, subscriber: text})}
             />
             <TextInput
               style={styles.input}
               placeholder="预约人联系方式"
+              placeholderTextColor={globalStyles.placeholderText.color}
               value={formData.subscriberPhone}
               onChangeText={(text) => setFormData({...formData, subscriberPhone: text})}
               keyboardType="phone-pad"
@@ -284,7 +287,7 @@ const AppointmentPage = () => {
       >
         <View style={styles.modalView}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>选择预约的时间段</Text>
+            <Text style={[styles.modalTitle, globalStyles.text]}>选择预约的时间段</Text>
             <View style={styles.timeGrid}>
               {hourLists.map((time, index) => (
                 <TouchableOpacity
@@ -302,7 +305,7 @@ const AppointmentPage = () => {
                   }}
                   disabled={unavailableTimes.includes(time)}
                 >
-                  <Text style={unavailableTimes.includes(time) ? styles.timeItemTextDisabled : null}>
+                  <Text style={[unavailableTimes.includes(time) ? styles.timeItemTextDisabled : null, globalStyles.text]}>
                     {time}
                   </Text>
                 </TouchableOpacity>
@@ -321,7 +324,7 @@ const AppointmentPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff', // 改为纯白色背景
   },
   scrollView: {
     flex: 1,
@@ -331,56 +334,73 @@ const styles = StyleSheet.create({
   },
   appointmentTitle: {
     marginBottom: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: '#333333',
+    paddingBottom: 10,
   },
   titleText: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#000000', // 使用纯黑色
   },
   formSection: {
-    marginBottom: 20,
+    marginBottom: 25, // 增加底部间距
   },
   subtitle: {
     fontSize: 18,
+    fontWeight: '600',
     marginBottom: 10,
-    color: '#333',
+    color: '#B22222', // 使用深红色
   },
   picker: {
-    backgroundColor: '#fff',
-    borderRadius: 5,
+    backgroundColor: '#f8f8f8', // 浅灰色背景
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    color: '#000000',
   },
   input: {
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    padding: 12,
     marginBottom: 10,
+    fontSize: 16,
+    color: '#000000', // 使用纯黑色文字
   },
   datePickerButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 10,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    padding: 12,
     marginBottom: 10,
   },
   timePickerButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 10,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    padding: 12,
   },
   submitButton: {
-    backgroundColor: '#D43030',
+    backgroundColor: '#B22222', // 使用深红色
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 20,
   },
   submitButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
+    fontWeight: 'bold',
   },
   modalView: {
     flex: 1,
@@ -401,12 +421,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    width: '80%',
+    width: '90%', // 增加宽度
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: 20,
+    color: '#000000', // 使用纯黑色
   },
   timeGrid: {
     flexDirection: 'row',
@@ -415,35 +436,39 @@ const styles = StyleSheet.create({
   },
   timeItem: {
     width: '30%',
-    padding: 10,
-    marginBottom: 10,
+    padding: 12,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
+    borderColor: '#cccccc',
+    borderRadius: 10,
     alignItems: 'center',
+    backgroundColor: '#f8f8f8', // 浅灰色背景
   },
   timeItemActive: {
-    backgroundColor: '#D43030',
+    backgroundColor: '#B22222', // 使用深红色
   },
   closeButton: {
     marginTop: 20,
-    padding: 10,
-    backgroundColor: '#D43030',
-    borderRadius: 5,
+    padding: 12,
+    backgroundColor: '#B22222', // 使用深红色
+    borderRadius: 10,
+    width: '100%', // 使按钮宽度与模态框一致
+    alignItems: 'center',
   },
   closeButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   disabledButton: {
     opacity: 0.5,
   },
   timeItemDisabled: {
-    backgroundColor: '#f0f0f0',
-    borderColor: '#ccc',
+    backgroundColor: '#e0e0e0',
+    borderColor: '#cccccc',
   },
   timeItemTextDisabled: {
-    color: '#999',
+    color: '#999999',
   },
 });
 

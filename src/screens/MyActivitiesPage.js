@@ -5,15 +5,16 @@ import { useNavigation } from '@react-navigation/native';
 import BottomTabNavigator from '../components/BottomTabNavigator';
 import { getMyActivities, getMyActivitiesCount } from '../api/activityApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import globalStyles from '../config/globalStyles';
 
 const ActivityItem = ({ item, onPress }) => (
   <TouchableOpacity style={styles.activityItem} onPress={() => onPress(item)}>
     <View>
-      <Text style={styles.activityName}>活动名称：{item.activity_name}</Text>
-      <Text style={styles.eventTime}>开始时间：{new Date(item.start_date).toLocaleDateString()}</Text>
-      <Text style={styles.eventTime}>结束时间：{new Date(item.end_date).toLocaleDateString()}</Text>
-      <Text style={styles.eventDetail}>组织：{item.organization}</Text>
-      <Text style={styles.eventDetail}>负责人：{item.responsible_name}</Text>
+      <Text style={[styles.activityName, globalStyles.text]}>活动名称：{item.activity_name}</Text>
+      <Text style={[styles.eventTime, globalStyles.text]}>开始时间：{new Date(item.start_date).toLocaleDateString()}</Text>
+      <Text style={[styles.eventTime, globalStyles.text]}>结束时间：{new Date(item.end_date).toLocaleDateString()}</Text>
+      <Text style={[styles.eventDetail, globalStyles.text]}>组织：{item.organization}</Text>
+      <Text style={[styles.eventDetail, globalStyles.text]}>负责人：{item.responsible_name}</Text>
     </View>
     {item.status === 0 && (
       <View style={styles.state_0}>
@@ -139,8 +140,8 @@ const MyActivitiesPage = () => {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>我发起的活动</Text>
-          <Text style={styles.comment}>共{totalRecord}条记录</Text>
+          <Text style={[styles.title, globalStyles.text]}>我发起的活动</Text>
+          <Text style={[styles.comment, globalStyles.text]}>共{totalRecord}条记录</Text>
         </View>
         {activities.length === 0 ? (
           <View style={styles.noData}>

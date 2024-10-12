@@ -5,15 +5,17 @@ import { useNavigation } from '@react-navigation/native';
 import BottomTabNavigator from '../components/BottomTabNavigator';
 import { getUserAppointments, getUserAppointmentsCount } from '../api/appointmentApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import globalStyles from '../config/globalStyles';
+
 
 const AppointmentItem = ({ item, onPress }) => (
   <TouchableOpacity style={styles.appointmentItem} onPress={() => onPress(item)}>
     <View>
-      <Text style={styles.teacherName}>预约老师：{item.teacher}</Text>
-      <Text style={styles.appointmentTime}>预约时间：{new Date(item.appointmentDate).toLocaleDateString()} {item.appointmentTime}</Text>
-      <Text style={styles.appointmentDetail}>组织：{item.organization}</Text>
-      <Text style={styles.appointmentDetail}>预约人：{item.subscriber}</Text>
-      <Text style={styles.appointmentDetail}>预约事项：{item.content}</Text>
+      <Text style={[styles.teacherName, globalStyles.text]}>预约老师：{item.teacher}</Text>
+      <Text style={[styles.appointmentTime, globalStyles.text]}>预约时间：{new Date(item.appointmentDate).toLocaleDateString()} {item.appointmentTime}</Text>
+      <Text style={[styles.appointmentDetail, globalStyles.text]}>组织：{item.organization}</Text>
+      <Text style={[styles.appointmentDetail, globalStyles.text]}>预约人：{item.subscriber}</Text>
+      <Text style={[styles.appointmentDetail, globalStyles.text]}>预约事项：{item.content}</Text>
     </View>
     <View style={styles[`state_${item.status}`]}>
       <Text style={styles.stateContent}>{getStatusText(item.status)}</Text>
@@ -132,8 +134,8 @@ const HistoryAppointmentsPage = () => {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>历史预约</Text>
-          <Text style={styles.comment}>共{totalRecord}条记录</Text>
+          <Text style={[styles.title, globalStyles.text]}>历史预约</Text>
+          <Text style={[styles.comment, globalStyles.text]}>共{totalRecord}条记录</Text>
         </View>
         {appointments.length === 0 ? (
           <View style={styles.noData}>

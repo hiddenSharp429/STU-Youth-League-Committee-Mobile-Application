@@ -4,6 +4,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import DocumentPicker from 'react-native-document-picker';
 import { updateActivity, API_URL } from '../api/activityApi';
 import axios from 'axios';
+import globalStyles from '../config/globalStyles';
 
 const SubmitActivitySummaryPage = () => {
   const route = useRoute();
@@ -148,8 +149,9 @@ const SubmitActivitySummaryPage = () => {
       <View style={styles.section}>
         <Text style={styles.subtitle}>1. 活动实际参与人数:</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, globalStyles.textInput]}
           placeholder="必填"
+          placeholderTextColor={globalStyles.placeholderText.color}
           keyboardType="numeric"
           value={summary.practicalMember}
           onChangeText={(text) => handleInputChange('practicalMember', text)}
@@ -160,7 +162,7 @@ const SubmitActivitySummaryPage = () => {
         <Text style={styles.subtitle}>2. 满意度调查情况（上传附件调查表）：</Text>
         <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument('satisfaction')}>
           <Image source={require('../../assets/icons/uploading.png')} style={styles.uploadIcon} />
-          <Text style={styles.uploadText}>
+          <Text style={[styles.uploadText, globalStyles.text]}>
             {files.satisfaction ? files.satisfaction.name : '上传文件'} <Text style={styles.required}>*</Text>
           </Text>
         </TouchableOpacity>
@@ -169,29 +171,32 @@ const SubmitActivitySummaryPage = () => {
       <View style={styles.section}>
         <Text style={styles.subtitle}>3. 项目资金实际情况（上传附件细项）</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, globalStyles.textInput]}
           placeholder="总价（必填*）"
+          placeholderTextColor={globalStyles.placeholderText.color}
           keyboardType="numeric"
           value={summary.practicalTotalMoney}
           onChangeText={(text) => handleInputChange('practicalTotalMoney', text)}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, globalStyles.textInput]}
           placeholder="实际赞助金额"
+          placeholderTextColor={globalStyles.placeholderText.color}
           keyboardType="numeric"
           value={summary.practicalSponsorship}
           onChangeText={(text) => handleInputChange('practicalSponsorship', text)}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, globalStyles.textInput]}
           placeholder="实际申请拨款金额"
+          placeholderTextColor={globalStyles.placeholderText.color}
           keyboardType="numeric"
           value={summary.practicalApMoney}
           onChangeText={(text) => handleInputChange('practicalApMoney', text)}
         />
         <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument('fund')}>
           <Image source={require('../../assets/icons/uploading3.png')} style={styles.uploadIcon} />
-          <Text style={styles.uploadText}>
+          <Text style={[styles.uploadText, globalStyles.text]}>
             {files.fund ? files.fund.name : '上传文件'} <Text style={styles.required}>*</Text>
           </Text>
         </TouchableOpacity>
@@ -201,7 +206,7 @@ const SubmitActivitySummaryPage = () => {
         <Text style={styles.subtitle}>4. 活动文件（申报书，总结表，备忘录）：</Text>
         <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument('activityFiles')}>
           <Image source={require('../../assets/icons/uploading2.png')} style={styles.uploadIcon} />
-          <Text style={styles.uploadText}>
+          <Text style={[styles.uploadText, globalStyles.text]}>
             {files.activityFiles ? files.activityFiles.name : '上传文件'} <Text style={styles.required}>*</Text>
           </Text>
         </TouchableOpacity>
@@ -212,18 +217,19 @@ const SubmitActivitySummaryPage = () => {
         {summary.publicityLinks.map((link, index) => (
           <TextInput
             key={index}
-            style={styles.input}
+            style={[styles.input, globalStyles.textInput]}
             placeholder="报道链接"
+            placeholderTextColor={globalStyles.placeholderText.color}
             value={link}
             onChangeText={(text) => handleLinkChange(index, text, 'publicityLinks')}
           />
         ))}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.addButton} onPress={() => addLink('publicityLinks')}>
-            <Text style={styles.buttonText}>添加输入框</Text>
+            <Text style={[styles.buttonText, globalStyles.text]}>添加输入框</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.delButton} onPress={() => removeLink('publicityLinks')}>
-            <Text style={styles.buttonText}>删除输入框</Text>
+            <Text style={[styles.buttonText, globalStyles.text]}>删除输入框</Text>
           </TouchableOpacity>
         </View>
         <Text style={styles.tips}>注：包括该活动有关的所有宣传报道</Text>
@@ -234,18 +240,19 @@ const SubmitActivitySummaryPage = () => {
         {summary.oaLinks.map((link, index) => (
           <TextInput
             key={index}
-            style={styles.input}
+            style={[styles.input, globalStyles.textInput]}
             placeholder="请输入OA链接"
+            placeholderTextColor={globalStyles.placeholderText.color}
             value={link}
             onChangeText={(text) => handleLinkChange(index, text, 'oaLinks')}
           />
         ))}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.addButton} onPress={() => addLink('oaLinks')}>
-            <Text style={styles.buttonText}>添加输入框</Text>
+            <Text style={[styles.buttonText, globalStyles.text]}>添加输入框</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.delButton} onPress={() => removeLink('oaLinks')}>
-            <Text style={styles.buttonText}>删除输入框</Text>
+            <Text style={[styles.buttonText, globalStyles.text]}>删除输入框</Text>
           </TouchableOpacity>
         </View>
       </View>

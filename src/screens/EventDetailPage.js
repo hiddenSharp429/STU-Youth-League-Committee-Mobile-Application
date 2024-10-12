@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getActivityById, approveActivity, rejectActivity } from '../api/activityApi';
 import { approveAppointment, rejectAppointment } from '../api/appointmentApi';
+import globalStyles from '../config/globalStyles';
 
 const EventDetailPage = () => {
   const route = useRoute();
@@ -410,8 +411,8 @@ const EventDetailPage = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{isAppointment ? '预约详情' : data.activity_name}</Text>
-        <Text style={styles.status}>
+        <Text style={[styles.title, globalStyles.text]}>{isAppointment ? '预约详情' : data.activity_name}</Text>
+        <Text style={[styles.status, globalStyles.text]}>
           状态: {
             isAppointment
               ? (data.status === 0 ? '待审核' : data.status === 1 ? '已通过' : '已驳回')

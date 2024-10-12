@@ -7,6 +7,8 @@ import XLSX from 'xlsx';
 import Share from 'react-native-share';
 import RNFS from 'react-native-fs';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import globalStyles from '../config/globalStyles';
+
 
 const TeacherAppointmentApprovalPage = () => {
   const [pendingAppointments, setPendingAppointments] = useState([]);
@@ -63,22 +65,17 @@ const TeacherAppointmentApprovalPage = () => {
         '预约事项': appointment.content
       })));
       
-      // 将工作表加到工作簿
-      XLSX.utils.book_append_sheet(wb, ws, "待审核预约");
+      // 将工作表添加到工作簿
+      XLSX.utils.book_append_sheet(wb, ws, "已通过预约");
       
-      // 将工作簿转换为二进制字符串
-      const wbout = XLSX.write(wb, { type: 'binary', bookType: 'xlsx' });
+      // 将工作簿转换为base64编码的字符串
+      const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
       
-      // 将二进制字符串转换为 ArrayBuffer
-      const buffer = new ArrayBuffer(wbout.length);
-      const view = new Uint8Array(buffer);
-      for (let i = 0; i < wbout.length; i++) view[i] = wbout.charCodeAt(i) & 0xFF;
-      
-      const fileName = `待审核预约_${new Date().toISOString().slice(0,10)}.xlsx`;
+      const fileName = `已通过预约_${selectedDate.toISOString().slice(0,10)}.xlsx`;
       const filePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
       
-      // 写入文件
-      await RNFS.writeFile(filePath, buffer, 'ascii');
+      // 将base64字符串写入文件
+      await RNFS.writeFile(filePath, wbout, 'base64');
       
       Alert.alert(
         '成功',
@@ -132,7 +129,8 @@ const TeacherAppointmentApprovalPage = () => {
 
       // 创建一个工作簿
       const wb = XLSX.utils.book_new();
-      
+      console.log(filteredAppointments);
+      console.log(selectedDate);
       // 将已通过的预约数据转换为工作表
       const ws = XLSX.utils.json_to_sheet(filteredAppointments.map(appointment => ({
         '预约人': appointment.subscriber,
@@ -145,19 +143,14 @@ const TeacherAppointmentApprovalPage = () => {
       // 将工作表添加到工作簿
       XLSX.utils.book_append_sheet(wb, ws, "已通过预约");
       
-      // 将工作簿转换为二进制字符串
-      const wbout = XLSX.write(wb, { type: 'binary', bookType: 'xlsx' });
-      
-      // 将二进制字符串转换为 ArrayBuffer
-      const buffer = new ArrayBuffer(wbout.length);
-      const view = new Uint8Array(buffer);
-      for (let i = 0; i < wbout.length; i++) view[i] = wbout.charCodeAt(i) & 0xFF;
+      // 将工作簿转换为base64编码的字符串
+      const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
       
       const fileName = `已通过预约_${selectedDate.toISOString().slice(0,10)}.xlsx`;
       const filePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
       
-      // 写入文件
-      await RNFS.writeFile(filePath, buffer, 'ascii');
+      // 将base64字符串写入文件
+      await RNFS.writeFile(filePath, wbout, 'base64');
       
       Alert.alert(
         '成功',
@@ -217,11 +210,11 @@ const TeacherAppointmentApprovalPage = () => {
       style={styles.appointmentItem} 
       onPress={() => handleAppointmentPress(item)}
     >
-      <Text style={styles.teacherName}>预约人: {item.subscriber}</Text>
-      <Text style={styles.appointmentTime}>预约时间: {new Date(item.appointmentDate).toLocaleDateString()} {item.appointmentTime}</Text>
-      <Text style={styles.appointmentDetail}>组织: {item.organization}</Text>
-      <Text style={styles.appointmentDetail}>预约老师: {item.teacher}</Text>
-      <Text style={styles.appointmentDetail}>预约事项: {item.content}</Text>
+      <Text style={[styles.teacherName, globalStyles.text]}>预约人: {item.subscriber}</Text>
+      <Text style={[styles.appointmentTime, globalStyles.text]}>预约时间: {new Date(item.appointmentDate).toLocaleDateString()} {item.appointmentTime}</Text>
+      <Text style={[styles.appointmentDetail, globalStyles.text]}>组织: {item.organization}</Text>
+      <Text style={[styles.appointmentDetail, globalStyles.text]}>预约老师: {item.teacher}</Text>
+      <Text style={[styles.appointmentDetail, globalStyles.text]}>预约事项: {item.content}</Text>
       <View style={styles[`state_${item.status}`]}>
         <Text style={styles.stateContent}>{getStatusText(item.status)}</Text>
       </View>
@@ -244,19 +237,19 @@ const TeacherAppointmentApprovalPage = () => {
           style={[styles.tab, activeTab === 'pending' && styles.activeTab]}
           onPress={() => setActiveTab('pending')}
         >
-          <Text style={styles.tabText}>待审核</Text>
+          <Text style={[styles.tabText, globalStyles.text]}>待审核</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'approved' && styles.activeTab]}
           onPress={() => setActiveTab('approved')}
         >
-          <Text style={styles.tabText}>已通过</Text>
+          <Text style={[styles.tabText, globalStyles.text]}>已通过</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'rejected' && styles.activeTab]}
           onPress={() => setActiveTab('rejected')}
         >
-          <Text style={styles.tabText}>已驳回</Text>
+          <Text style={[styles.tabText, globalStyles.text]}>已驳回</Text>
         </TouchableOpacity>
       </View>
 

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react
 import { SwipeRow } from 'react-native-swipe-list-view';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { getUsers, deleteUser } from '../api/userApi';
+import globalStyles from '../config/globalStyles';
 
 const UserItem = ({ item, onDelete }) => (
   <SwipeRow rightOpenValue={-65} disableRightSwipe>
@@ -14,8 +15,8 @@ const UserItem = ({ item, onDelete }) => (
     <View style={styles.rowFront}>
       <FontAwesome name="user-o" size={20} color="#666" style={styles.icon} />
       <View style={styles.userInfo}>
-        <Text style={styles.userName}>{item.name}</Text>
-        <Text style={styles.userAccount}>{item.account}</Text>
+        <Text style={[styles.userName, globalStyles.text]}>{item.name}</Text>
+        <Text style={[styles.userAccount, globalStyles.text]}>{item.account}</Text>
       </View>
       <View style={styles.tagContainer}>
         <Text style={[styles.tag, { backgroundColor: getTagColor(item.type) }]}>

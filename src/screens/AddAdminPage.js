@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { createInviteCode } from '../api/inviteCodeApi';
-
+import globalStyles from '../config/globalStyles';
 const CustomRadioButton = ({ label, value, selectedValue, onSelect }) => (
   <TouchableOpacity style={styles.radioItem} onPress={() => onSelect(value)}>
     <FontAwesome
@@ -10,7 +10,7 @@ const CustomRadioButton = ({ label, value, selectedValue, onSelect }) => (
       size={24}
       color={selectedValue === value ? '#1989fa' : '#666'}
     />
-    <Text style={styles.radioLabel}>{label}</Text>
+    <Text style={[styles.radioLabel, globalStyles.text]}>{label}</Text>
   </TouchableOpacity>
 );
 
@@ -54,7 +54,7 @@ const AddAdminPage = () => {
 
       <Text style={styles.header}>添加小程序审批端使用用户</Text>
 
-      <Text style={styles.title}>选择其对应的审批端:</Text>
+      <Text style={[styles.title, globalStyles.text]}>选择其对应的审批端:</Text>
       <View style={styles.radioContainer}>
         <CustomRadioButton
           label="活动审批端"
@@ -70,18 +70,19 @@ const AddAdminPage = () => {
         />
       </View>
 
-      <Text style={styles.title}>用户ID (将作为邀请码)</Text>
+      <Text style={[styles.title, globalStyles.text]}>用户ID (将作为邀请码)</Text>
       <View style={styles.inputContainer}>
         <FontAwesome name="user" size={20} color="#666" style={styles.icon} />
         <TextInput
-          style={styles.input}
+          style={[styles.input, globalStyles.textInput]}
           onChangeText={setCode}
           value={code}
           placeholder="输入需要注册用户的wxID（将作为邀请码）"
+          placeholderTextColor={globalStyles.placeholderText.color}
         />
       </View>
 
-      <Text style={styles.title}>备注姓名*（可选）</Text>
+      <Text style={[styles.title, globalStyles.text]}>备注姓名*（可选）</Text>
       <View style={styles.inputContainer}>
         <FontAwesome name="pencil" size={20} color="#666" style={styles.icon} />
         <TextInput
@@ -89,6 +90,7 @@ const AddAdminPage = () => {
           onChangeText={setName}
           value={name}
           placeholder="输入需要注册用户的姓名"
+          placeholderTextColor={globalStyles.placeholderText.color}
         />
       </View>
 
@@ -131,6 +133,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
+    color: '#000000',
   },
   radioContainer: {
     backgroundColor: 'white',
@@ -146,6 +149,7 @@ const styles = StyleSheet.create({
   radioLabel: {
     marginLeft: 10,
     fontSize: 16,
+    color: '#000000',
   },
   inputContainer: {
     flexDirection: 'row',

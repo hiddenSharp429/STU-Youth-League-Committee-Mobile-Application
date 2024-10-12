@@ -7,6 +7,7 @@ import { loginUser } from '../api/authApi';
 import LoginOverlay from '../components/LoginOverlay';
 import PatternLock from '../components/PatternLock';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import globalStyles from '../config/globalStyles';
 
 const ChoicePage = () => {
   const [show, setShow] = useState(false);
@@ -231,7 +232,7 @@ const ChoicePage = () => {
     <View style={styles.container}>
       <View style={styles.dividerContainer}>
         <Divider style={styles.divider} />
-        <Text style={styles.dividerText}>团团活动管理</Text>
+        <Text style={[styles.dividerText, globalStyles.text]}>团团活动管理</Text>
         <Divider style={styles.divider} />
       </View>
 

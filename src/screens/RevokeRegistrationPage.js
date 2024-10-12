@@ -1,8 +1,8 @@
 /*
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-09-27 14:44:12
- * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-09-27 15:20:08
+ * @LastEditors: hiddenSharp429 z404878860@163.com
+ * @LastEditTime: 2024-10-12 14:40:59
  * @FilePath: /YLC/src/screens/RevokeRegistrationPage.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -11,6 +11,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react
 import { SwipeRow } from 'react-native-swipe-list-view';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { getInviteCodes, deleteInviteCode } from '../api/inviteCodeApi';
+import globalStyles from '../config/globalStyles';
 
 const InviteCodeItem = ({ item, onDelete }) => (
   <SwipeRow rightOpenValue={-65} disableRightSwipe>
@@ -22,8 +23,8 @@ const InviteCodeItem = ({ item, onDelete }) => (
     <View style={styles.rowFront}>
       <FontAwesome name="user-o" size={20} color="#666" style={styles.icon} />
       <View style={styles.userInfo}>
-        <Text style={styles.userName}>{item.name || item.code}</Text>
-        <Text style={styles.userAccount}>{item.code}</Text>
+        <Text style={[styles.userName, globalStyles.text]}>{item.name || item.code}</Text>
+        <Text style={[styles.userAccount, globalStyles.text]}>{item.code}</Text>
       </View>
       <View style={styles.tagContainer}>
         <Text style={[styles.tag, { backgroundColor: getTagColor(item.type) }]}>

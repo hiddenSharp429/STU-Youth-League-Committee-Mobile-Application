@@ -2,7 +2,7 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-27 19:29:54
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-09-29 15:09:48
+ * @LastEditTime: 2024-10-12 14:30:17
  * @FilePath: /YLC/src/screens/ApplyActivityPage.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -16,6 +16,8 @@ import RadioButton from '../components/RadioButton';
 import BottomTabNavigator from '../components/BottomTabNavigator';
 import { addActivity } from '../api/activityApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import globalStyles from '../config/globalStyles';
+
 const ApplyActivityPage = () => {
   const navigation = useNavigation();
   const [formData, setFormData] = useState({
@@ -120,7 +122,7 @@ const ApplyActivityPage = () => {
         return;
     }
     if (!formData.endDate) {
-        Alert.alert('错误', '请选择结束时间');
+        Alert.alert('��误', '请选择结束时间');
         return;     
     }
     if (!formData.area) {
@@ -251,6 +253,7 @@ const ApplyActivityPage = () => {
             <TextInput
                 style={styles.input}
                 placeholder="活动名称（必填*）"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.activityName}
                 onChangeText={(text) => setFormData({...formData, activityName: text})}
             />
@@ -274,7 +277,7 @@ const ApplyActivityPage = () => {
             <View style={styles.formSection}>
             <Text style={styles.subtitle}>起始时间*</Text>
             <TouchableOpacity onPress={() => setShowStartDatePicker(true)} style={styles.datePickerButton}>
-                <Text>{formData.startDate.toDateString()}</Text>
+                <Text style={globalStyles.text}>{formData.startDate.toDateString()}</Text>
                 <Icon name="calendar" size={20} color="#000" />
             </TouchableOpacity>
             {showStartDatePicker && (
@@ -296,7 +299,7 @@ const ApplyActivityPage = () => {
             <View style={styles.formSection}>
             <Text style={styles.subtitle}>结束时间*</Text>
             <TouchableOpacity onPress={() => setShowEndDatePicker(true)} style={styles.datePickerButton}>
-                <Text>{formData.endDate.toDateString()}</Text>
+                <Text style={globalStyles.text}>{formData.endDate.toDateString()}</Text>
                 <Icon name="calendar" size={20} color="#000" />
             </TouchableOpacity>
             {showEndDatePicker && (
@@ -329,6 +332,7 @@ const ApplyActivityPage = () => {
             <TextInput
                 style={styles.input}
                 placeholder="具体地点（必填*）"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.activityPlace}
                 onChangeText={(text) => setFormData({...formData, activityPlace: text})}
             />
@@ -340,18 +344,21 @@ const ApplyActivityPage = () => {
             <TextInput
                 style={styles.input}
                 placeholder="负责人姓名(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.responsibleName}
                 onChangeText={(text) => setFormData({...formData, responsibleName: text})}
             />
             <TextInput
                 style={styles.input}
                 placeholder="负责人年级(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.responsibleGrade}
                 onChangeText={(text) => setFormData({...formData, responsibleGrade: text})}
             />
             <TextInput
                 style={styles.input}
                 placeholder="负责人电话(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.responsiblePhone}
                 onChangeText={(text) => setFormData({...formData, responsiblePhone: text})}
                 keyboardType="phone-pad"
@@ -359,6 +366,7 @@ const ApplyActivityPage = () => {
             <TextInput
                 style={styles.input}
                 placeholder="负责人邮箱(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.responsibleEmail}
                 onChangeText={(text) => setFormData({...formData, responsibleEmail: text})}
                 keyboardType="email-address"
@@ -371,6 +379,7 @@ const ApplyActivityPage = () => {
             <TextInput
                 style={styles.input}
                 placeholder="预计参与人数(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.participantCount}
                 onChangeText={(text) => setFormData({...formData, participantCount: text})}
                 keyboardType="numeric"  
@@ -383,6 +392,7 @@ const ApplyActivityPage = () => {
             <TextInput
                 style={styles.input}
                 placeholder="项目内容阐述(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.briefContent}
                 onChangeText={(text) => setFormData({...formData, briefContent: text})}
                 multiline={true}
@@ -397,6 +407,7 @@ const ApplyActivityPage = () => {
             <TextInput
                 style={styles.input}
                 placeholder="合计：xx元"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.budgetTotal}
                 onChangeText={(text) => setFormData({...formData, budgetTotal: text})}
                 keyboardType="numeric"
@@ -404,6 +415,7 @@ const ApplyActivityPage = () => {
             <TextInput
                 style={styles.input}
                 placeholder="自筹数：xx元"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.budgetSelf}
                 onChangeText={(text) => setFormData({...formData, budgetSelf: text})}
                 keyboardType="numeric"
@@ -411,6 +423,7 @@ const ApplyActivityPage = () => {
             <TextInput
                 style={styles.input}
                 placeholder="申请拨款数：xx元"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.budgetApply}
                 onChangeText={(text) => setFormData({...formData, budgetApply: text})}
                 keyboardType="numeric"
@@ -435,18 +448,21 @@ const ApplyActivityPage = () => {
                 <TextInput
                 style={styles.input}
                 placeholder="赞助公司(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.sponsorCompany}
                 onChangeText={(text) => setFormData({...formData, sponsorCompany: text})}
                 />
                 <TextInput
                 style={styles.input}
                 placeholder="赞助形式"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.sponsorForm}
                 onChangeText={(text) => setFormData({...formData, sponsorForm: text})}
                 />
                 <TextInput
                 style={styles.input}
                 placeholder="赞助金额(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.sponsorMoney}
                 onChangeText={(text) => setFormData({...formData, sponsorMoney: text})}
                 keyboardType="numeric"
@@ -471,24 +487,28 @@ const ApplyActivityPage = () => {
                 <TextInput
                 style={styles.input}
                 placeholder="借款人姓名(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.borrowerName}
                 onChangeText={(text) => setFormData({...formData, borrowerName: text})}
                 />
                 <TextInput
                 style={styles.input}
                 placeholder="借款人年级(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.borrowerGrade}
                 onChangeText={(text) => setFormData({...formData, borrowerGrade: text})}
                 />
                 <TextInput
                 style={styles.input}
                 placeholder="借款人专业(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.borrowerMajor}
                 onChangeText={(text) => setFormData({...formData, borrowerMajor: text})}
                 />
                 <TextInput
                 style={styles.input}
                 placeholder="借款人电话(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.borrowerPhone}
                 onChangeText={(text) => setFormData({...formData, borrowerPhone: text})}
                 keyboardType="phone-pad"
@@ -496,6 +516,7 @@ const ApplyActivityPage = () => {
                 <TextInput
                 style={styles.input}
                 placeholder="借款金额(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.borrowerMoney}
                 onChangeText={(text) => setFormData({...formData, borrowerMoney: text})}
                 keyboardType="numeric"
@@ -520,12 +541,14 @@ const ApplyActivityPage = () => {
                 <TextInput
                 style={styles.input}
                 placeholder="发放对象(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.serviceObject}
                 onChangeText={(text) => setFormData({...formData, serviceObject: text})}
                 />
                 <TextInput
                 style={styles.input}
                 placeholder="服务金额(必填)"
+                placeholderTextColor={globalStyles.placeholderText.color}
                 value={formData.serviceMoney}
                 onChangeText={(text) => setFormData({...formData, serviceMoney: text})}
                 keyboardType="numeric"
@@ -558,7 +581,7 @@ const ApplyActivityPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff', // 改为纯白色背景
   },
   apply: {
     marginHorizontal: 15,
@@ -566,47 +589,57 @@ const styles = StyleSheet.create({
   applyTitle: {
     height: 45,
     borderBottomWidth: 2.5,
-    borderBottomColor: '#A6A6A6',
+    borderBottomColor: '#333333', // 加深边框颜色
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 15, // 增加底部间距
   },
   titleText: {
     fontSize: 28,
     fontFamily: 'Segoe UI',
+    fontWeight: 'bold', // 加粗标题
+    color: '#000000', // 使用纯黑色
   },
   subtitle: {
     fontSize: 18,
-    fontWeight: '400',
-    color: '#D43C33',
+    fontWeight: '600', // 增加字重
+    color: '#B22222', // 使用更深的红色
     marginBottom: 10,
+    marginTop: 15, // 增加顶部间距
   },
   picker: {
     borderWidth: 1,
-    borderColor: '#F2E6E6',
+    borderColor: '#cccccc', // 加深边框颜色
     borderRadius: 15,
     padding: 0,
     marginBottom: 15,
+    backgroundColor: '#f8f8f8', // 添加浅灰色背景
+    color: '#000000',
   },
   datePickerButton: {
     borderWidth: 1,
-    borderColor: '#F2E6E6',
+    borderColor: '#cccccc', // 加深边框颜色
     borderRadius: 15,
     padding: 10,
     marginBottom: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#f8f8f8', // 添加浅灰色背景
   },
   input: {
     borderWidth: 1,
-    borderColor: '#F2E6E6',
+    borderColor: '#cccccc', // 加深边框颜色
     borderRadius: 15,
     padding: 10,
     marginBottom: 15,
+    fontSize: 16, // 增加字体大小
+    color: '#000000', // 使用纯黑色文字
+    backgroundColor: '#ffffff', // 确保输入框背景为白色
   },
   submitButton: {
-    backgroundColor: '#D43030',
+    backgroundColor: '#B22222', // 使用更深的红色
     borderRadius: 40,
     padding: 15,
     alignItems: 'center',
@@ -615,9 +648,12 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 18, // 增加字体大小
     fontWeight: 'bold',
-  }
+  },
+  formSection: {
+    marginBottom: 20, // 增加表单部分之间的间距
+  },
 });
 
 export default ApplyActivityPage;

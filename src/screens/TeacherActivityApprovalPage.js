@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, RefreshContr
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAllActivities } from '../api/activityApi';
+import globalStyles from '../config/globalStyles';
 
 const TeacherActivityApprovalPage = () => {
   const [activities, setActivities] = useState({
@@ -82,10 +83,10 @@ const TeacherActivityApprovalPage = () => {
       style={styles.activityItem} 
       onPress={() => handleActivityPress(item)}
     >
-      <Text style={styles.activityName}>活动名称: {item.activity_name}</Text>
-      <Text style={styles.activityTime}>活动时间: {new Date(item.start_date).toLocaleDateString()} - {new Date(item.end_date).toLocaleDateString()}</Text>
-      <Text style={styles.activityDetail}>活动地点: {item.area}</Text>
-      <Text style={styles.activityDetail}>所属组织: {item.organization}</Text>
+      <Text style={[styles.activityName, globalStyles.text]}>活动名称: {item.activity_name}</Text>
+      <Text style={[styles.activityTime, globalStyles.text]}>活动时间: {new Date(item.start_date).toLocaleDateString()} - {new Date(item.end_date).toLocaleDateString()}</Text>
+      <Text style={[styles.activityDetail, globalStyles.text]}>活动地点: {item.area}</Text>
+      <Text style={[styles.activityDetail, globalStyles.text]}>所属组织: {item.organization}</Text>
       <View style={styles[`state_${item.status}`]}>
         <Text style={styles.stateContent}>{getStatusText(item.status)}</Text>
       </View>
@@ -120,31 +121,31 @@ const TeacherActivityApprovalPage = () => {
             style={[styles.tab, activeTab === 'pending' && styles.activeTab]}
             onPress={() => handleTabPress('pending')}
           >
-            <Text style={styles.tabText}>待审核</Text>
+            <Text style={[styles.tabText, globalStyles.text]}>待审核</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'approved' && styles.activeTab]}
             onPress={() => handleTabPress('approved')}
           >
-            <Text style={styles.tabText}>已通过</Text>
+            <Text style={[styles.tabText, globalStyles.text]}>已通过</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'rejected' && styles.activeTab]}
             onPress={() => handleTabPress('rejected')}
           >
-            <Text style={styles.tabText}>已驳回</Text>
+            <Text style={[styles.tabText, globalStyles.text]}>已驳回</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'reportApproved' && styles.activeTab]}
             onPress={() => handleTabPress('reportApproved')}
           >
-            <Text style={styles.tabText}>已提交总结</Text>
+            <Text style={[styles.tabText, globalStyles.text]}>已提交总结</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'finished' && styles.activeTab]}
             onPress={() => handleTabPress('finished')}
           >
-            <Text style={styles.tabText}>已结束</Text>
+            <Text style={[styles.tabText, globalStyles.text]}>已结束</Text>
           </TouchableOpacity>
         </ScrollView>
       </View>

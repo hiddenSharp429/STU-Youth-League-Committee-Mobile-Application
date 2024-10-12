@@ -1,15 +1,16 @@
 /*
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2024-09-27 13:36:06
- * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-09-27 15:19:33
+ * @LastEditors: hiddenSharp429 z404878860@163.com
+ * @LastEditTime: 2024-10-12 14:37:38
  * @FilePath: /YLC/src/screens/AddUserPage.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { createInviteCode } from '../api/inviteCodeApi';  // 添加这行导入
+import { createInviteCode } from '../api/inviteCodeApi';  
+import globalStyles from '../config/globalStyles';
 
 const CustomRadioButton = ({ label, value, selectedValue, onSelect }) => (
   <TouchableOpacity style={styles.radioItem} onPress={() => onSelect(value)}>
@@ -18,7 +19,7 @@ const CustomRadioButton = ({ label, value, selectedValue, onSelect }) => (
       size={24}
       color={selectedValue === value ? '#1989fa' : '#666'}
     />
-    <Text style={styles.radioLabel}>{label}</Text>
+    <Text style={[styles.radioLabel, globalStyles.text]}>{label}</Text>
   </TouchableOpacity>
 );
 
@@ -53,9 +54,9 @@ const AddUserPage = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>添加小程序用户端使用用户</Text>
+      <Text style={[styles.header, globalStyles.text]}>添加小程序用户端使用用户</Text>
 
-      <Text style={styles.title}>是否为其开通不受限预约端口</Text>
+      <Text style={[styles.title, globalStyles.text]}>是否为其开通不受限预约端口</Text>
       <View style={styles.radioContainer}>
         <CustomRadioButton
           label="确定为其开放不受限端口"
@@ -71,25 +72,27 @@ const AddUserPage = () => {
         />
       </View>
 
-      <Text style={styles.title}>用户ID (将作为邀请码)</Text>
+      <Text style={[styles.title, globalStyles.text]}>用户ID (将作为邀请码)</Text>
       <View style={styles.inputContainer}>
         <FontAwesome name="user" size={20} color="#666" style={styles.icon} />
         <TextInput
-          style={styles.input}
+          style={[styles.input, globalStyles.textInput]}
           onChangeText={setCode}
           value={code}
           placeholder="输入需要注册用户的wxID（将作为邀请码）"
+          placeholderTextColor={globalStyles.placeholderText.color}
         />
       </View>
 
-      <Text style={styles.title}>备注姓名*（可选）</Text>
+      <Text style={[styles.title, globalStyles.text]}>备注姓名*（可选）</Text>
       <View style={styles.inputContainer}>
         <FontAwesome name="pencil" size={20} color="#666" style={styles.icon} />
         <TextInput
-          style={styles.input}
+          style={[styles.input, globalStyles.textInput]}
           onChangeText={setName}
           value={name}
           placeholder="输入需要注册用户的姓名"
+          placeholderTextColor={globalStyles.placeholderText.color}
         />
       </View>
 
