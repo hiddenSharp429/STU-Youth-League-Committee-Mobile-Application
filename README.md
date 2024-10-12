@@ -2,11 +2,24 @@
  * @Author: hiddenSharp429 z404878860@163.com
  * @Date: 2024-09-24 11:58:33
  * @LastEditors: hiddenSharp429 z404878860@163.com
- * @LastEditTime: 2024-10-05 23:47:33
+ * @LastEditTime: 2024-10-13 00:35:03
  * @FilePath: /YLC/README.md
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 # STU-团团活动管理系统
+
+## 前言
+由于微信小程序主体认证问题无法解决，而一个好的软件又需要不断迭代，所以就花了两周连夜开发了APP版本，目前APP版本已基本开发完毕，后端API也已基本开发完毕，欢迎大家star并提出宝贵意见，谢谢！
+
+## 支持平台
+- Android
+- iOS(未测试)
+
+## 技术栈
+
+- 前端：React Native
+- 后端：Node.js, Express
+- 数据库：MySQL
 
 ## 项目概述
 
@@ -100,4 +113,6 @@
 
 ## 联系方式
 
-[hiddenSharp429](https://github.com/hiddenSharp429)
+@Author: [hiddenSharp429](https://github.com/hiddenSharp429)
+@Email: z404878860@163.com
+@WeChat: hiddensharp429

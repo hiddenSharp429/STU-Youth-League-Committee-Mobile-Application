@@ -8,6 +8,7 @@ import LoginOverlay from '../components/LoginOverlay';
 import PatternLock from '../components/PatternLock';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import globalStyles from '../config/globalStyles';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 const ChoicePage = () => {
   const [show, setShow] = useState(false);
@@ -214,13 +215,14 @@ const ChoicePage = () => {
   const copyGitHubLink = () => {
     Alert.alert(
       '告知',
-      '本项目为开源项目，22年开始开发，目前作者已大四，至今仍在独自维护该项目，下附仓库链接，欢迎大家star并提出宝贵意见，谢谢！',
+      '本项目为开源项目，22年开始开发，由于微信小程序主体认证问题无法解决，作者连夜开发APP，目前作者已大四，至今仍在独自维护该项目，下附仓库链接，欢迎大家star并提出宝贵意见，谢谢！',
       [
         { text: '取消', style: 'cancel' },
         { 
           text: '复制链接', 
           onPress: () => {
             // 实现复制功能
+            Clipboard.setString('https://github.com/hiddenSharp429/STU-Youth-League-Committee-Mobile-Application');
             Alert.alert('链接已复制');
           }
         }
